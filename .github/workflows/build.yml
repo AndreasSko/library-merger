@@ -8,7 +8,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: sersoft-gmbh/xcodebuild-action@v2
+      - uses: sersoft-gmbh/xcodebuild-action@v3
         with:
           project: jwlm.xcodeproj
           scheme: jwlm
