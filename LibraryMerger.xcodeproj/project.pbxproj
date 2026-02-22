@@ -1,0 +1,808 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F402E1D827789A020083C4EB /* Gomobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F402E1D727789A020083C4EB /* Gomobile.xcframework */; };
+		F402E1DC277DB4C70083C4EB /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F402E1DB277DB4C70083C4EB /* ErrorView.swift */; };
+		F420DFC2255C0C6900CEB66B /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574EF253341CB00EC55D4 /* BackupView.swift */; };
+		F42649AE257E469100644CA6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F42649AD257E469100644CA6 /* SettingsView.swift */; };
+		F433F8F12573C11B00258C29 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F433F8F02573C11B00258C29 /* OnboardingView.swift */; };
+		F434746D2A6835AD00CC424E /* PlaylistWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F434746C2A6835AD00CC424E /* PlaylistWarningView.swift */; };
+		F43574B72533411900EC55D4 /* LibraryMergerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574B62533411900EC55D4 /* LibraryMergerApp.swift */; };
+		F43574B92533411900EC55D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574B82533411900EC55D4 /* ContentView.swift */; };
+		F43574BB2533411B00EC55D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F43574BA2533411B00EC55D4 /* Assets.xcassets */; };
+		F43574BE2533411B00EC55D4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F43574BD2533411B00EC55D4 /* Preview Assets.xcassets */; };
+		F43574C92533411B00EC55D4 /* LibraryMergerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */; };
+		F43574D42533411B00EC55D4 /* LibraryMergerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574D32533411B00EC55D4 /* LibraryMergerUITests.swift */; };
+		F43574F0253341CB00EC55D4 /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574EF253341CB00EC55D4 /* BackupView.swift */; };
+		F43B4A1E253346DD005BF9E8 /* MergerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43B4A1D253346DC005BF9E8 /* MergerController.swift */; };
+		F441B1502549AE4900B0409B /* MergeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F441B14F2549AE4900B0409B /* MergeView.swift */; };
+		F441B1622549CEB100B0409B /* MergeConflictDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F441B1612549CEB100B0409B /* MergeConflictDetailsView.swift */; };
+		F447E5AF255997BA00C3DA35 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = F447E5AE255997BA00C3DA35 /* Models.swift */; };
+		F447E5BD255A7BC000C3DA35 /* MergeConflictOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = F447E5BC255A7BC000C3DA35 /* MergeConflictOverview.swift */; };
+		F44BF82B2533602B0057B980 /* FileType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44BF82A2533602B0057B980 /* FileType.swift */; };
+		F44BF830253376B10057B980 /* MergeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44BF82F253376B10057B980 /* MergeSettingsView.swift */; };
+		F44BF838253476110057B980 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44BF837253476110057B980 /* ExportView.swift */; };
+		F44BF8512534D5070057B980 /* MergeConflictResolutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44BF8502534D5070057B980 /* MergeConflictResolutionView.swift */; };
+		F476B840260A2274009F0265 /* MergeSettingsLegendHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F476B83F260A2274009F0265 /* MergeSettingsLegendHelp.swift */; };
+		F48F44B6255E808B0050C564 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48F44B5255E808B0050C564 /* HelpView.swift */; };
+		F48F44D2255EC4DC0050C564 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F48F44D4255EC4DC0050C564 /* Localizable.strings */; };
+		F48F4526256073460050C564 /* If.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48F4525256073450050C564 /* If.swift */; };
+		F4B6A4512AA2441500DFC7E1 /* BackupIncompatibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B6A4502AA2441500DFC7E1 /* BackupIncompatibleView.swift */; };
+		F4B8AEA725867E0B008DF433 /* CatalogDBSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B8AEA625867E0B008DF433 /* CatalogDBSettingsView.swift */; };
+		F4B8AEAF25867E7B008DF433 /* PublicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B8AEAE25867E7B008DF433 /* PublicationController.swift */; };
+		F4B8AECE258A83C3008DF433 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B8AECD258A83C3008DF433 /* NotificationView.swift */; };
+		F4BC51242920377B002E0711 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = F4BC51232920377B002E0711 /* Sentry */; };
+		F4BC5126292124ED002E0711 /* SentrySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BC5125292124ED002E0711 /* SentrySettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F43574C52533411B00EC55D4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F43574AB2533411900EC55D4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F43574B22533411900EC55D4;
+			remoteInfo = LibraryMerger;
+		};
+		F43574D02533411B00EC55D4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F43574AB2533411900EC55D4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F43574B22533411900EC55D4;
+			remoteInfo = LibraryMerger;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F402E1D727789A020083C4EB /* Gomobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Gomobile.xcframework; sourceTree = "<group>"; };
+		F402E1DB277DB4C70083C4EB /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		F420DF9B255B34E800CEB66B /* LibraryMerger.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LibraryMerger.entitlements; sourceTree = "<group>"; };
+		F42649AD257E469100644CA6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F433F8F02573C11B00258C29 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		F434746C2A6835AD00CC424E /* PlaylistWarningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistWarningView.swift; sourceTree = "<group>"; };
+		F43574B32533411900EC55D4 /* LibraryMerger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LibraryMerger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F43574B62533411900EC55D4 /* LibraryMergerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryMergerApp.swift; sourceTree = "<group>"; };
+		F43574B82533411900EC55D4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F43574BA2533411B00EC55D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F43574BD2533411B00EC55D4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		F43574BF2533411B00EC55D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F43574C42533411B00EC55D4 /* LibraryMergerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LibraryMergerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryMergerTests.swift; sourceTree = "<group>"; };
+		F43574CA2533411B00EC55D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F43574CF2533411B00EC55D4 /* LibraryMergerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LibraryMergerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F43574D32533411B00EC55D4 /* LibraryMergerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryMergerUITests.swift; sourceTree = "<group>"; };
+		F43574D52533411B00EC55D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F43574EF253341CB00EC55D4 /* BackupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackupView.swift; sourceTree = "<group>"; };
+		F43B4A1D253346DC005BF9E8 /* MergerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MergerController.swift; sourceTree = "<group>"; };
+		F441B14F2549AE4900B0409B /* MergeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeView.swift; sourceTree = "<group>"; };
+		F441B1612549CEB100B0409B /* MergeConflictDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeConflictDetailsView.swift; sourceTree = "<group>"; };
+		F447E5AE255997BA00C3DA35 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		F447E5BC255A7BC000C3DA35 /* MergeConflictOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeConflictOverview.swift; sourceTree = "<group>"; };
+		F44BF82A2533602B0057B980 /* FileType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileType.swift; sourceTree = "<group>"; };
+		F44BF82F253376B10057B980 /* MergeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeSettingsView.swift; sourceTree = "<group>"; };
+		F44BF837253476110057B980 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		F44BF8502534D5070057B980 /* MergeConflictResolutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeConflictResolutionView.swift; sourceTree = "<group>"; };
+		F476B83F260A2274009F0265 /* MergeSettingsLegendHelp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeSettingsLegendHelp.swift; sourceTree = "<group>"; };
+		F48F44B5255E808B0050C564 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
+		F48F44D3255EC4DC0050C564 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F48F44D8255EC5090050C564 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F48F4525256073450050C564 /* If.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = If.swift; sourceTree = "<group>"; };
+		F4B6A4502AA2441500DFC7E1 /* BackupIncompatibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupIncompatibleView.swift; sourceTree = "<group>"; };
+		F4B8AEA625867E0B008DF433 /* CatalogDBSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogDBSettingsView.swift; sourceTree = "<group>"; };
+		F4B8AEAE25867E7B008DF433 /* PublicationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicationController.swift; sourceTree = "<group>"; };
+		F4B8AECD258A83C3008DF433 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
+		F4BC5125292124ED002E0711 /* SentrySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentrySettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F43574B02533411900EC55D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F402E1D827789A020083C4EB /* Gomobile.xcframework in Frameworks */,
+				F4BC51242920377B002E0711 /* Sentry in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F43574C12533411B00EC55D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F43574CC2533411B00EC55D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F43574AA2533411800EC55D4 = {
+			isa = PBXGroup;
+			children = (
+				F43574B52533411900EC55D4 /* LibraryMerger */,
+				F43574D22533411B00EC55D4 /* LibraryMergerUITests */,
+				F43574C72533411B00EC55D4 /* LibraryMergerTests */,
+				F43574B42533411900EC55D4 /* Products */,
+				F43574E72533418300EC55D4 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		F43574B42533411900EC55D4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F43574B32533411900EC55D4 /* LibraryMerger.app */,
+				F43574C42533411B00EC55D4 /* LibraryMergerTests.xctest */,
+				F43574CF2533411B00EC55D4 /* LibraryMergerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F43574B52533411900EC55D4 /* LibraryMerger */ = {
+			isa = PBXGroup;
+			children = (
+				F4B8AEA525867DEF008DF433 /* Settings */,
+				F48F4524256073330050C564 /* Extensions */,
+				F420DF9B255B34E800CEB66B /* LibraryMerger.entitlements */,
+				F43574B62533411900EC55D4 /* LibraryMergerApp.swift */,
+				F433F8F02573C11B00258C29 /* OnboardingView.swift */,
+				F43574B82533411900EC55D4 /* ContentView.swift */,
+				F43574EF253341CB00EC55D4 /* BackupView.swift */,
+				F44BF82F253376B10057B980 /* MergeSettingsView.swift */,
+				F476B83F260A2274009F0265 /* MergeSettingsLegendHelp.swift */,
+				F441B14F2549AE4900B0409B /* MergeView.swift */,
+				F447E5AE255997BA00C3DA35 /* Models.swift */,
+				F44BF837253476110057B980 /* ExportView.swift */,
+				F4B8AECD258A83C3008DF433 /* NotificationView.swift */,
+				F44BF8502534D5070057B980 /* MergeConflictResolutionView.swift */,
+				F447E5BC255A7BC000C3DA35 /* MergeConflictOverview.swift */,
+				F441B1612549CEB100B0409B /* MergeConflictDetailsView.swift */,
+				F48F44B5255E808B0050C564 /* HelpView.swift */,
+				F402E1DB277DB4C70083C4EB /* ErrorView.swift */,
+				F434746C2A6835AD00CC424E /* PlaylistWarningView.swift */,
+				F4B6A4502AA2441500DFC7E1 /* BackupIncompatibleView.swift */,
+				F43B4A1D253346DC005BF9E8 /* MergerController.swift */,
+				F4B8AEAE25867E7B008DF433 /* PublicationController.swift */,
+				F43574BA2533411B00EC55D4 /* Assets.xcassets */,
+				F43574BF2533411B00EC55D4 /* Info.plist */,
+				F43574BC2533411B00EC55D4 /* Preview Content */,
+				F44BF82A2533602B0057B980 /* FileType.swift */,
+				F48F44D4255EC4DC0050C564 /* Localizable.strings */,
+			);
+			path = LibraryMerger;
+			sourceTree = "<group>";
+		};
+		F43574BC2533411B00EC55D4 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				F43574BD2533411B00EC55D4 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		F43574C72533411B00EC55D4 /* LibraryMergerTests */ = {
+			isa = PBXGroup;
+			children = (
+				F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */,
+				F43574CA2533411B00EC55D4 /* Info.plist */,
+			);
+			path = LibraryMergerTests;
+			sourceTree = "<group>";
+		};
+		F43574D22533411B00EC55D4 /* LibraryMergerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F43574D32533411B00EC55D4 /* LibraryMergerUITests.swift */,
+				F43574D52533411B00EC55D4 /* Info.plist */,
+			);
+			path = LibraryMergerUITests;
+			sourceTree = "<group>";
+		};
+		F43574E72533418300EC55D4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F402E1D727789A020083C4EB /* Gomobile.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F48F4524256073330050C564 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F48F4525256073450050C564 /* If.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		F4B8AEA525867DEF008DF433 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F42649AD257E469100644CA6 /* SettingsView.swift */,
+				F4B8AEA625867E0B008DF433 /* CatalogDBSettingsView.swift */,
+				F4BC5125292124ED002E0711 /* SentrySettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F43574B22533411900EC55D4 /* LibraryMerger */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F43574D82533411B00EC55D4 /* Build configuration list for PBXNativeTarget "LibraryMerger" */;
+			buildPhases = (
+				F43574AF2533411900EC55D4 /* Sources */,
+				F43574B02533411900EC55D4 /* Frameworks */,
+				F43574B12533411900EC55D4 /* Resources */,
+				F441B1572549B1DE00B0409B /* Swiftlint */,
+				F4B6A4522AA2453000DFC7E1 /* Sentry DSYM */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LibraryMerger;
+			packageProductDependencies = (
+				F4BC51232920377B002E0711 /* Sentry */,
+			);
+			productName = LibraryMerger;
+			productReference = F43574B32533411900EC55D4 /* LibraryMerger.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F43574C32533411B00EC55D4 /* LibraryMergerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F43574DB2533411B00EC55D4 /* Build configuration list for PBXNativeTarget "LibraryMergerTests" */;
+			buildPhases = (
+				F43574C02533411B00EC55D4 /* Sources */,
+				F43574C12533411B00EC55D4 /* Frameworks */,
+				F43574C22533411B00EC55D4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F43574C62533411B00EC55D4 /* PBXTargetDependency */,
+			);
+			name = LibraryMergerTests;
+			productName = LibraryMergerTests;
+			productReference = F43574C42533411B00EC55D4 /* LibraryMergerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F43574CE2533411B00EC55D4 /* LibraryMergerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F43574DE2533411B00EC55D4 /* Build configuration list for PBXNativeTarget "LibraryMergerUITests" */;
+			buildPhases = (
+				F43574CB2533411B00EC55D4 /* Sources */,
+				F43574CC2533411B00EC55D4 /* Frameworks */,
+				F43574CD2533411B00EC55D4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F43574D12533411B00EC55D4 /* PBXTargetDependency */,
+			);
+			name = LibraryMergerUITests;
+			productName = LibraryMergerUITests;
+			productReference = F43574CF2533411B00EC55D4 /* LibraryMergerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F43574AB2533411900EC55D4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1200;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					F43574B22533411900EC55D4 = {
+						CreatedOnToolsVersion = 12.0.1;
+					};
+					F43574C32533411B00EC55D4 = {
+						CreatedOnToolsVersion = 12.0.1;
+						TestTargetID = F43574B22533411900EC55D4;
+					};
+					F43574CE2533411B00EC55D4 = {
+						CreatedOnToolsVersion = 12.0.1;
+						TestTargetID = F43574B22533411900EC55D4;
+					};
+				};
+			};
+			buildConfigurationList = F43574AE2533411900EC55D4 /* Build configuration list for PBXProject "LibraryMerger" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				de,
+				Base,
+			);
+			mainGroup = F43574AA2533411800EC55D4;
+			packageReferences = (
+				F491EE162920356D00ADD716 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+			);
+			productRefGroup = F43574B42533411900EC55D4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F43574B22533411900EC55D4 /* LibraryMerger */,
+				F43574C32533411B00EC55D4 /* LibraryMergerTests */,
+				F43574CE2533411B00EC55D4 /* LibraryMergerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F43574B12533411900EC55D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F43574BE2533411B00EC55D4 /* Preview Assets.xcassets in Resources */,
+				F48F44D2255EC4DC0050C564 /* Localizable.strings in Resources */,
+				F43574BB2533411B00EC55D4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F43574C22533411B00EC55D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F43574CD2533411B00EC55D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F441B1572549B1DE00B0409B /* Swiftlint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Swiftlint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n    exit 0\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		F4B6A4522AA2453000DFC7E1 /* Sentry DSYM */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			name = "Sentry DSYM";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "if which sentry-cli >/dev/null; then\nexport SENTRY_ORG=andreas-skorczyk\nexport SENTRY_PROJECT=library-merger\nERROR=$(sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F43574AF2533411900EC55D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4B8AEAF25867E7B008DF433 /* PublicationController.swift in Sources */,
+				F476B840260A2274009F0265 /* MergeSettingsLegendHelp.swift in Sources */,
+				F48F44B6255E808B0050C564 /* HelpView.swift in Sources */,
+				F447E5AF255997BA00C3DA35 /* Models.swift in Sources */,
+				F4BC5126292124ED002E0711 /* SentrySettingsView.swift in Sources */,
+				F402E1DC277DB4C70083C4EB /* ErrorView.swift in Sources */,
+				F48F4526256073460050C564 /* If.swift in Sources */,
+				F4B6A4512AA2441500DFC7E1 /* BackupIncompatibleView.swift in Sources */,
+				F433F8F12573C11B00258C29 /* OnboardingView.swift in Sources */,
+				F43574B92533411900EC55D4 /* ContentView.swift in Sources */,
+				F441B1502549AE4900B0409B /* MergeView.swift in Sources */,
+				F43B4A1E253346DD005BF9E8 /* MergerController.swift in Sources */,
+				F44BF82B2533602B0057B980 /* FileType.swift in Sources */,
+				F43574B72533411900EC55D4 /* LibraryMergerApp.swift in Sources */,
+				F42649AE257E469100644CA6 /* SettingsView.swift in Sources */,
+				F4B8AEA725867E0B008DF433 /* CatalogDBSettingsView.swift in Sources */,
+				F434746D2A6835AD00CC424E /* PlaylistWarningView.swift in Sources */,
+				F441B1622549CEB100B0409B /* MergeConflictDetailsView.swift in Sources */,
+				F44BF830253376B10057B980 /* MergeSettingsView.swift in Sources */,
+				F43574F0253341CB00EC55D4 /* BackupView.swift in Sources */,
+				F44BF838253476110057B980 /* ExportView.swift in Sources */,
+				F44BF8512534D5070057B980 /* MergeConflictResolutionView.swift in Sources */,
+				F4B8AECE258A83C3008DF433 /* NotificationView.swift in Sources */,
+				F447E5BD255A7BC000C3DA35 /* MergeConflictOverview.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F43574C02533411B00EC55D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F43574C92533411B00EC55D4 /* LibraryMergerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F43574CB2533411B00EC55D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F420DFC2255C0C6900CEB66B /* BackupView.swift in Sources */,
+				F43574D42533411B00EC55D4 /* LibraryMergerUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F43574C62533411B00EC55D4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F43574B22533411900EC55D4 /* LibraryMerger */;
+			targetProxy = F43574C52533411B00EC55D4 /* PBXContainerItemProxy */;
+		};
+		F43574D12533411B00EC55D4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F43574B22533411900EC55D4 /* LibraryMerger */;
+			targetProxy = F43574D02533411B00EC55D4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		F48F44D4255EC4DC0050C564 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F48F44D3255EC4DC0050C564 /* en */,
+				F48F44D8255EC5090050C564 /* de */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F43574D62533411B00EC55D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F43574D72533411B00EC55D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F43574D92533411B00EC55D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LibraryMerger/LibraryMerger.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_ASSET_PATHS = "\"LibraryMerger/Preview Content\"";
+				DEVELOPMENT_TEAM = 9YFM7J3EH3;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				INFOPLIST_FILE = LibraryMerger/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.7.7;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.andreas-sk.jwlm";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F43574DA2533411B00EC55D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LibraryMerger/LibraryMerger.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_ASSET_PATHS = "\"LibraryMerger/Preview Content\"";
+				DEVELOPMENT_TEAM = 9YFM7J3EH3;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				INFOPLIST_FILE = LibraryMerger/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.7.7;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.andreas-sk.jwlm";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F43574DC2533411B00EC55D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 95P96TD862;
+				INFOPLIST_FILE = LibraryMergerTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "andreas-sk.de.jwlmTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LibraryMerger.app/LibraryMerger";
+			};
+			name = Debug;
+		};
+		F43574DD2533411B00EC55D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 95P96TD862;
+				INFOPLIST_FILE = LibraryMergerTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "andreas-sk.de.jwlmTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LibraryMerger.app/LibraryMerger";
+			};
+			name = Release;
+		};
+		F43574DF2533411B00EC55D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 95P96TD862;
+				INFOPLIST_FILE = LibraryMergerUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "andreas-sk.de.jwlmUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LibraryMerger;
+			};
+			name = Debug;
+		};
+		F43574E02533411B00EC55D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 95P96TD862;
+				INFOPLIST_FILE = LibraryMergerUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "andreas-sk.de.jwlmUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LibraryMerger;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F43574AE2533411900EC55D4 /* Build configuration list for PBXProject "LibraryMerger" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F43574D62533411B00EC55D4 /* Debug */,
+				F43574D72533411B00EC55D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F43574D82533411B00EC55D4 /* Build configuration list for PBXNativeTarget "LibraryMerger" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F43574D92533411B00EC55D4 /* Debug */,
+				F43574DA2533411B00EC55D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F43574DB2533411B00EC55D4 /* Build configuration list for PBXNativeTarget "LibraryMergerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F43574DC2533411B00EC55D4 /* Debug */,
+				F43574DD2533411B00EC55D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F43574DE2533411B00EC55D4 /* Build configuration list for PBXNativeTarget "LibraryMergerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F43574DF2533411B00EC55D4 /* Debug */,
+				F43574E02533411B00EC55D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F491EE162920356D00ADD716 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F4BC51232920377B002E0711 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F491EE162920356D00ADD716 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F43574AB2533411900EC55D4 /* Project object */;
+}
