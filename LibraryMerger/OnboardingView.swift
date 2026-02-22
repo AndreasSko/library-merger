@@ -20,7 +20,8 @@ struct OnboardingView: View {
                         Onboarding2().tag(2)
                         Onboarding3().tag(3)
                         Onboarding4().tag(4)
-                        Onboarding5(needsOnboarding: $needsOnboarding).tag(5)
+                        OnboardingLegalNotice().tag(5)
+                        Onboarding5(needsOnboarding: $needsOnboarding).tag(6)
                     }
                     .frame(width: UIScreen.main.bounds.width,
                            height: UIScreen.main.bounds.height - 120)
@@ -28,7 +29,7 @@ struct OnboardingView: View {
                     .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
                 }
             }
-            if currentTab != 5 {
+            if currentTab != 6 {
                 Button(action: {
                     needsOnboarding = false
                 }, label: {
@@ -215,6 +216,21 @@ struct Onboarding4: View {
                 Text("🎉")
                 Text("onboarding.4.fourth")
             }
+
+            Spacer()
+        }
+        .padding()
+    }
+}
+
+struct OnboardingLegalNotice: View {
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Legal Notice")
+                .font(.title2).bold()
+                .padding(.bottom)
+
+            Text("legalNotice.body")
 
             Spacer()
         }

@@ -39,6 +39,7 @@
 		F4B8AECE258A83C3008DF433 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B8AECD258A83C3008DF433 /* NotificationView.swift */; };
 		F4BC51242920377B002E0711 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = F4BC51232920377B002E0711 /* Sentry */; };
 		F4BC5126292124ED002E0711 /* SentrySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BC5125292124ED002E0711 /* SentrySettingsView.swift */; };
+		F4AE6A022922000000000002 /* LegalNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AE6A012922000000000001 /* LegalNoticeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +98,7 @@
 		F4B8AEAE25867E7B008DF433 /* PublicationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicationController.swift; sourceTree = "<group>"; };
 		F4B8AECD258A83C3008DF433 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		F4BC5125292124ED002E0711 /* SentrySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentrySettingsView.swift; sourceTree = "<group>"; };
+		F4AE6A012922000000000001 /* LegalNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalNoticeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +231,7 @@
 				F42649AD257E469100644CA6 /* SettingsView.swift */,
 				F4B8AEA625867E0B008DF433 /* CatalogDBSettingsView.swift */,
 				F4BC5125292124ED002E0711 /* SentrySettingsView.swift */,
+				F4AE6A012922000000000001 /* LegalNoticeView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -419,6 +422,7 @@
 				F48F44B6255E808B0050C564 /* HelpView.swift in Sources */,
 				F447E5AF255997BA00C3DA35 /* Models.swift in Sources */,
 				F4BC5126292124ED002E0711 /* SentrySettingsView.swift in Sources */,
+				F4AE6A022922000000000002 /* LegalNoticeView.swift in Sources */,
 				F402E1DC277DB4C70083C4EB /* ErrorView.swift in Sources */,
 				F48F4526256073460050C564 /* If.swift in Sources */,
 				F4B6A4512AA2441500DFC7E1 /* BackupIncompatibleView.swift in Sources */,

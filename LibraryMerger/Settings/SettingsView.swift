@@ -75,6 +75,12 @@ struct SettingsView: View {
                     })
                 }
 
+                Section {
+                    NavigationLink(destination: LegalNoticeView()) {
+                        Text("Legal Notice")
+                    }
+                }
+
             }
             .navigationBarTitle("Settings")
             .navigationBarTitleDisplayMode(.large)

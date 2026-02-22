@@ -75,3 +75,7 @@ Make sure to use the latest version of this app. If you already do, please wait 
 "backupIncompatibleView.tooOld" = "The version of the backup you are trying to import is not supported anymore.
 Make sure to export the backup using the latest version of JW Library.";
 "backupIncompatibleView.unknown" = "The backup you are trying to import is not compatible.";
+
+// Legal Notice
+"Legal Notice" = "Legal Notice";
+"legalNotice.body" = "This application is not owned or operated by Watch Tower Bible and Tract Society of Pennsylvania, however it is distributed with permission under a license from Watch Tower. All ownership rights to the content within the JW Library® application remain exclusively with Watch Tower Bible and Tract Society of Pennsylvania.\n\nJW Library® is a registered trademark owned exclusively by Watch Tower Bible and Tract Society of Pennsylvania (\"Watch Tower\").";

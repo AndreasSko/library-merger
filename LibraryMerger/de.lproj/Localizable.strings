@@ -60,7 +60,7 @@
 "Error while exporting" = "Beim exportieren ist ein Fehler aufgetreten";
 
 // Onboarding
-"onboarding.1" = "Mit dem Library Merger kannst du zwei JW-Libraries zusammenführen";
+"onboarding.1" = "Mit dem Library Merger kannst du zwei JW Libraries® zusammenführen";
 "onboarding.1.trademark" = "(JW Library ist eine eingetragene Marke der Watch Tower Bible and Tract Society of Pennsylvania.)";
 
 "onboarding.2.first" = "Wähle die beiden Backups aus";
@@ -171,3 +171,7 @@ Stelle sicher, dass du die neueste Version dieser App nutzt. Wenn das schon so i
 "backupIncompatibleView.tooOld" = "Die Backup Version wird nicht mehr unterstützt.
 Stelle sicher, dass du für den Export des Backups die neueste Version von JW Library nutzt.";
 "backupIncompatibleView.unknown" = "Das Backup wird nicht unterstützt.";
+
+// Legal Notice
+"Legal Notice" = "Rechtlicher Hinweis";
+"legalNotice.body" = "Diese Anwendung ist nicht Eigentum der Watch Tower Bible and Tract Society of Pennsylvania und wird auch nicht von ihr betrieben, sondern mit Genehmigung unter einer Lizenz von Watch Tower vertrieben. Alle Eigentumsrechte an den Inhalten der JW Library®-Anwendung verbleiben ausschließlich bei der Watch Tower Bible and Tract Society of Pennsylvania. \n\nJW Library® ist eine eingetragene Marke, die ausschließlich der Watch Tower Bible and Tract Society of Pennsylvania („Watch Tower“) gehört.";
