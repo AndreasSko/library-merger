@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: sersoft-gmbh/xcodebuild-action@v2
         with:
-          project: jwlm.xcodeproj
-          scheme: jwlm
-          destination: platform=iOS Simulator,name=iPhone 11
+          project: LibraryMerger.xcodeproj
+          scheme: LibraryMerger
+          destination: platform=iOS Simulator,name=iPhone 17 Pro
           action: build

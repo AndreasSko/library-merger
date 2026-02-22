@@ -1,0 +1,81 @@
+/* 
+  Localizable.strings
+  LibraryMerger
+
+  Created by Andreas Skorczyk on 13.11.20.
+  
+*/
+
+// Onboarding
+"onboarding.1" = "Library Merger allows you to merge two JW-Library backups into one";
+"onboarding.1.trademark" = "(JW Library is a registered trademark of Watch Tower Bible and Tract Society of Pennsylvania.)";
+
+"onboarding.2.first" = "Select both backups";
+"onboarding.2.proTip.first" = "Use AirDrop to send backups between  devices";
+"onboarding.2.proTip.second" = "The share function allows you to send backups from your local library directly to Library Merger";
+"onboarding.2.proTip.third" = "You can also use iCloud, Dropbox, etc. to import backups from other devices";
+
+"onboarding.3.first" = "Decide if conflicts should be solved automatically";
+"onboarding.3.second" = "You can learn more about that later and skip it for now.";
+"onboarding.3.third" = "..and start merging be pressing";
+
+"onboarding.4.first" = "Library Merger checks for conflicting entries";
+"onboarding.4.second" = "If a conflict happens, simply select the side that should be included.";
+"onboarding.4.third" = "The first time, there might be a lot of conflicts. But don’t worry: All further ones should be pretty quick.";
+"onboarding.4.fourth" = "When everything is finished, you can export the merged backup.";
+
+"onboarding.5.first" = "Ready?";
+"onboarding.5.second" = "This app is still in its early stages, so it's always good to keep a backup of your JW Libraries - just in case.
+
+If you found a bug or have suggestions, feel free to contact me 😊 
+The easiest is to open an issue on GitHub or write me an email: library.merger@andreas-sk.de";
+"onboarding.5.third" = "This app is open source.";
+"onboarding.5.startButton" = "Let's start merging!";
+
+// Help
+"help.conflictAutoresolution.title" = "What is Conflict Autoresolution?";
+"help.conflictAutoresolution.text" = "When you are merging your backups, it might happen that two entries collide. Instead of asking you how to continue, you can decide to always choose one side instead of the other one. For Notes it's also possible to always choose the newer one. This might come in handy, if you are SURE that one side is always the one to include.\n\nThe safest path - especially when merging for the first time - is to leave it at `manual` and decide for each case, which entry should be included into the final backup.";
+
+"help.conflict.bookmarks.title" = "Bookmark conflict";
+"help.conflict.bookmarks.text" = "Bookmarks are set for each publication (i.e. a Watchtower issue or a Bible translation) and can be placed at ten different „slots“ (the colors you see in the app). A collision happens, if two bookmarks are placed at the same slot for the same publication. Choose the bookmark that should be included in the merged backup. The upper one belongs to the right backup, the lower one to the left.\n\n
+To figure out, to which publication this Bookmark belongs to, look at the additional information: „BookNumber“ and „ChapterNumber“ generally relate to a Bible book, while „DocumentID“ might be a Watchtower issue or a different publication.";
+
+"help.conflict.markings.title" = "Marking conflict";
+"help.conflict.markings.text" = "Markings conflict if they overlap at at least one point. A marking is defined by a Identifier, a StartToken and EndToken. You can think of identifier as paragraphs in a extended way: In bible books thery generally correlate to the verses, however in other publications, questions and captions are also counted towards identifiers. Start- and Endtoken represent the beginning and the end of a marking, where words and punctuation marks are counted as tokens (e.g. the sentence “You are my witnesses,” contains five tokens, as four words and one comma are counted). Note that a marking can span multiple Paragraphs. Choose the marking that should be included in the merged backup. The upper one belongs to the right backup, the lower one to the left.\n\n
+To figure out where the marking is located, look at the additional information: „BookNumber“ and „ChapterNumber“ generally relate to a Bible book, while „DocumentID“ might be a Watchtower issue or a different publication.";
+
+"help.conflict.notes.title" = "Note conflict";
+"help.conflict.notes.text" = "A note collides if it exists on both sides (so it must have been synced at least once) and it differers in the title or content. It generally makes sense to choose the note with the newest date. The upper one belongs to the right backup, the lower one to the left.";
+
+"help.conflict.input fields.title" = "Input field conflict";
+"help.conflict.input fields.text" = "Input fields are used in interactive publications where you can enter custom notes, tick boxes, etc. An example would be the 'Enjoy Life Forever!' brochure.";
+
+// Settings
+"settings.catalogDB.quickInfo" = "Download the Publication Catalog to see more detailed information when merging.";
+"settings.catalogDB.downloadSize" = "Downloading the catalog takes about 50MB.";
+"settings.catalogDB.explainer" = "It's a database that contains information about all the publications of the last years. With its help you are able to get more detailed information (like the title of a publication) when solving a merge conflicts. But you can also use the app without downloading it.";
+"settings.catalogDB.disclaimer" = "The catalog is downloaded from app.jw-cdn.org, which is operated by Watchtower Bible and Tract Society of New York, Inc. You may want to consider their Privacy Policy if you are not sure what data might be processed when you initialize the download.";
+
+"settings.sentry.explanation" = "You can enable to automatically send a bug report to me, the developer of the Library Merger, in case you encounter an issue. This helps to surface problems that others might face as well. For this, a third-party service called \"Sentry.io\" is used. The data collected does not contain personally identifiable information, but rather information like your operating system and the error message you received. None of your backups will be sent, however an error report might contain snippets like a marking or a note that was processed when you encountered the bug. The data is only used to improve the app.\nThe automatic report is disabled by default. If you feel confident sharing a bug report with me, you can enable it with the following toggle.";
+
+// ErrorView
+"errorView.reportError" = "Looks like you found a bug 😅. Could you help me to fix it?
+I would really appreciate it if you could send me a bug report with the error below at library.merger@andreas-sk.de. Usually, it's beneficial for me to have a look at the actual backups you tried to merge. So if you feel confident with it, please feel free to provide them with the bug report - of course, I'm only looking at the specific issue and leave the rest of the data untouched.
+Thank you so much for your help! 😊";
+"errorView.sentryHint" = "You can also decide to automatically send error reports:";
+
+// PlaylistWarningView
+"playlistWarningView.explanation" = "The backup contains playlists that the Library Merger is not able to process yet.
+Please note that playlists won't be included in the merged backup. If you want to keep them, export your playlists via the Share feature in JW Library first and import them again after you restored the merged backup.
+Merging playlists is a feature that I'm currently working on and will be included in a later version of Library Merger. Thank you for your patience 😊";
+
+// BackupIncompatibleView
+"backupIncompatibleView.tooNew" = "The version of the backup you are trying to import is not yet supported with Library Merger.
+Make sure to use the latest version of this app. If you already do, please wait a couple more days until I was able to add support for the latest version JW Library. Thank you for your patience 😊";
+"backupIncompatibleView.tooOld" = "The version of the backup you are trying to import is not supported anymore.
+Make sure to export the backup using the latest version of JW Library.";
+"backupIncompatibleView.unknown" = "The backup you are trying to import is not compatible.";
+
+// Legal Notice
+"Legal Notice" = "Legal Notice";
+"legalNotice.body" = "This application is not owned or operated by Watch Tower Bible and Tract Society of Pennsylvania, however it is distributed with permission under a license from Watch Tower. All ownership rights to the content within the JW Library® application remain exclusively with Watch Tower Bible and Tract Society of Pennsylvania.\n\nJW Library® is a registered trademark owned exclusively by Watch Tower Bible and Tract Society of Pennsylvania (\"Watch Tower\").";
