@@ -168,21 +168,24 @@ struct MergeSettingsView: View {
                     Menu {
                         Button(action: {
                             mergerController.settings.inputFieldResolver = ConflictSolver.disabled
-                            inputFieldSolverIcon = confSolverToIcon(solver: mergerController.settings.inputFieldResolver)
+                            inputFieldSolverIcon = confSolverToIcon(solver:
+                                                                        mergerController.settings.inputFieldResolver)
                         }, label: {
                             Text("Manual")
                             Image(systemName: "minus.circle")
                         })
                         Button(action: {
                             mergerController.settings.inputFieldResolver = ConflictSolver.chooseLeft
-                            inputFieldSolverIcon = confSolverToIcon(solver: mergerController.settings.inputFieldResolver)
+                            inputFieldSolverIcon = confSolverToIcon(solver:
+                                                                        mergerController.settings.inputFieldResolver)
                         }, label: {
                             Text("Left")
                             Image(systemName: "arrow.left")
                         })
                         Button(action: {
                             mergerController.settings.inputFieldResolver = ConflictSolver.chooseRight
-                            inputFieldSolverIcon = confSolverToIcon(solver: mergerController.settings.inputFieldResolver)
+                            inputFieldSolverIcon = confSolverToIcon(solver:
+                                                                        mergerController.settings.inputFieldResolver)
                         }, label: {
                             Text("Right")
                             Image(systemName: "arrow.right")
