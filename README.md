@@ -14,7 +14,11 @@ If you found a bug in the app, feel free to open an issue. If it might have some
 to do with the merge logic itself, it may be better to open the issue on the
 [go-library-merger](https://github.com/AndreasSko/go-library-merger) repository.
 
-![](docs/images/screenshots.png)
+<p>
+<img src="docs/images/screenshot1.png" width="300">
+<img src="docs/images/screenshot2.png" width="300">
+<img src="docs/images/screenshot3.png" width="300">
+</p>
 
 ## Legal Notice
 
