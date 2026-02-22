@@ -12,5 +12,5 @@ jobs:
         with:
           project: LibraryMerger.xcodeproj
           scheme: LibraryMerger
-          destination: platform=iOS Simulator,name=iPhone 11
+          destination: platform=iOS Simulator,name=iPhone 17 Pro
           action: build
