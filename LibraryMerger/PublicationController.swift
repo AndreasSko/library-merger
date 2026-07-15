@@ -32,7 +32,7 @@ struct Publication: Decodable {
 func generatePublLookup(_ location: Location?) -> GomobilePublicationLookup {
     let publQuery = GomobilePublicationLookup()
 
-    publQuery.documentID = location?.documentId.int32 ?? 0
+    publQuery.documentID = location?.documentId.int64 ?? 0
     publQuery.keySymbol = location?.keySymbol.string ?? ""
     publQuery.issueTagNumber = location?.issueTagNumber ?? 0
     publQuery.mepsLanguage = location?.mepsLanguage.int32 ?? 0

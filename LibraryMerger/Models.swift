@@ -101,7 +101,7 @@ struct Location: Decodable {
     let locationId: Int
     let bookNumber: NullInt32
     let chapterNumber: NullInt32
-    let documentId: NullInt32
+    let documentId: NullInt64
     let track: NullInt32
     let issueTagNumber: Int
     let keySymbol: NullString
@@ -159,6 +159,16 @@ struct NullInt32: Decodable {
     }
 
     let int32: Int
+    let valid: Bool
+}
+
+struct NullInt64: Decodable {
+    enum CodingKeys: String, CodingKey {
+        case int64 = "Int64"
+        case valid = "Valid"
+    }
+
+    let int64: Int64
     let valid: Bool
 }
 

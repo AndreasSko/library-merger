@@ -136,7 +136,7 @@ struct NoteOverview: View {
             if publication == nil && related?.location?.documentId.valid ?? false {
                 HStack {
                     Text("Document ID:").bold()
-                    Text(String(related?.location?.documentId.int32 ?? -1))
+                    Text(String(related?.location?.documentId.int64 ?? -1))
                         .frame(width: UIScreen.main.bounds.size.width-138, alignment: .leading)
                         .alignmentGuide(.custom) { $0[.leading] }
                 }
@@ -227,7 +227,7 @@ struct UserMarkBlockRangeOverview: View {
             if publication == nil && related?.location?.documentId.valid ?? false {
                 HStack {
                     Text("Document ID:").bold()
-                    Text(String(related?.location?.documentId.int32 ?? -1))
+                    Text(String(related?.location?.documentId.int64 ?? -1))
                         .frame(width: UIScreen.main.bounds.size.width-138, alignment: .leading)
                         .alignmentGuide(.custom) { $0[.leading] }
                 }
@@ -319,7 +319,7 @@ struct InputFieldOverview: View {
             if publication == nil && related?.location?.documentId.valid ?? false {
                 HStack {
                     Text("Document ID:").bold()
-                    Text(String(related?.location?.documentId.int32 ?? -1))
+                    Text(String(related?.location?.documentId.int64 ?? -1))
                         .frame(width: UIScreen.main.bounds.size.width-138, alignment: .leading)
                         .alignmentGuide(.custom) { $0[.leading] }
                 }

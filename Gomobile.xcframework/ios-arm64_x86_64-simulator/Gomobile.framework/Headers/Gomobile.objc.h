@@ -222,7 +222,7 @@ It directly maps to publication.Lookup
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-@property (nonatomic) long documentID;
+@property (nonatomic) int64_t documentID;
 @property (nonatomic) NSString* _Nonnull keySymbol;
 @property (nonatomic) long issueTagNumber;
 @property (nonatomic) long mepsLanguage;
