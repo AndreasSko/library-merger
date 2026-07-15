@@ -24,7 +24,7 @@ class LibraryMergerTests: XCTestCase {
     }
 
     func testDocumentIDBeyondInt32Decodes() throws {
-        let data = #"{"Int64":4052170279,"Valid":true}"#.data(using: .utf8)!
+        let data = Data(#"{"Int64":4052170279,"Valid":true}"#.utf8)
 
         let documentID = try JSONDecoder().decode(NullInt64.self, from: data)
 
