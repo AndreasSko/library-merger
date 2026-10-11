@@ -1,16 +1,148 @@
-name: Build
+name: Build and portable playlist contracts
 
 on:
   push:
+  pull_request:
 
 jobs:
   Build:
-    runs-on: macos-latest
+    # Validate the exact checked-in static framework with a stable consumer.
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
     steps:
-      - uses: actions/checkout@v3
-      - uses: sersoft-gmbh/xcodebuild-action@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          project: LibraryMerger.xcodeproj
-          scheme: LibraryMerger
-          destination: platform=iOS Simulator,name=iPhone 17 Pro
-          action: build
+          go-version: '1.27.1'
+      - name: Read immutable framework source
+        id: source
+        run: echo "commit=$(python3 scripts/verify-gomobile-provenance.py --print-source)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: AndreasSko/go-library-merger
+          ref: ${{ steps.source.outputs.commit }}
+          path: go-source
+      - name: Verify embedded framework provenance
+        run: python3 scripts/verify-gomobile-provenance.py --go-source go-source
+      - name: Regenerate embedded synthetic fixtures
+        run: |
+          python3 scripts/build-playlist-test-fixtures.py --go-source go-source --output "$RUNNER_TEMP/embedded-fixtures"
+          python3 - <<'PY'
+          import os, pathlib
+          original=pathlib.Path('LibraryMergerTests/Fixtures')
+          generated=pathlib.Path(os.environ['RUNNER_TEMP'])/'embedded-fixtures'
+          assert {p.name for p in original.glob('*.jwlibrary')} == {p.name for p in generated.glob('*.jwlibrary')}, 'Synthetic fixture inventory is stale'
+          for file in generated.glob('*.jwlibrary'):
+              assert file.read_bytes() == (original/file.name).read_bytes(), 'Synthetic fixture is stale: '+file.name
+          PY
+      - name: Build source probe
+        working-directory: go-source
+        run: go build -o ../playlist-probe ../scripts/probe-playlist-merge.go
+      - name: Test contract oracle
+        run: |
+          python3 scripts/test-playlist-contract-harness.py
+          python3 scripts/test-publication-fixtures.py
+      - name: Generate mandatory fictional fixtures
+        run: python3 scripts/build-portable-playlist-matrix.py "$RUNNER_TEMP/portable-playlists" --go-source go-source
+      - name: Audit fixture and source merge contracts
+        run: |
+          mkdir -p evidence
+          python3 scripts/validate-playlist-fixtures.py "$RUNNER_TEMP/portable-playlists" --report evidence/structure.json
+          python3 scripts/execute-playlist-fixture-scenarios.py "$RUNNER_TEMP/portable-playlists" --probe ./playlist-probe --report evidence/execution.json
+      - name: Verify stable consumer toolchain and record producer
+        run: |
+          xcodebuild -version | tee evidence/xcode-version.txt
+          xcodebuild -showsdks > evidence/xcode-sdks.txt
+          go version > evidence/go-version.txt
+          python3 - <<'PYTHON'
+          import json, pathlib, re, subprocess
+          provenance=json.load(open('Gomobile.source.json'))
+          actual=pathlib.Path('evidence/xcode-version.txt').read_text()
+          match=re.search(r'Xcode (\d+)\.(\d+)',actual)
+          assert match and (int(match.group(1)),int(match.group(2)))==(26,6), 'Required consumer Xcode 26.6 is unavailable'
+          # Gomobile contains static C/Objective-C archives, with no Swift module.
+          # Real linking and XCTest validate this consumer; producer provenance
+          # and all embedded file hashes remain independently verified above.
+          binary='Gomobile.xcframework/ios-arm64/Gomobile.framework/Gomobile'
+          kind=subprocess.check_output(['file',binary],text=True)
+          assert 'ar archive' in kind, 'Reassess consumer compatibility for a non-static framework'
+          pathlib.Path('evidence/framework-toolchains.json').write_text(json.dumps({
+              'producerXcode':provenance['xcodeVersion'], 'consumerXcode':actual.strip(),
+              'goSourceCommit':provenance['sourceCommit'], 'frameworkKind':kind.strip(),
+              'compatibilityGate':'Compile, link, controller/UI tests and export audits against the unchanged embedded binary'
+          },indent=2)+'\n')
+          PYTHON
+      - name: Choose available iPhone and iPad simulators
+        run: |
+          xcrun simctl list devices available --json > devices.json
+          xcrun simctl list runtimes --json > runtimes.json
+          xcrun simctl list devicetypes --json > devicetypes.json
+          python3 - <<'PYTHON'
+          import json, os, pathlib, subprocess
+          devices=json.load(open('devices.json'))['devices']
+          runtimes=[r for r in json.load(open('runtimes.json'))['runtimes'] if r['isAvailable'] and '.iOS-' in r['identifier']]
+          runtimes.sort(key=lambda r: tuple(map(int,r['version'].split('.'))),reverse=True)
+          def existing(family):
+              return next((d['udid'] for r in runtimes for d in devices.get(r['identifier'],[]) if d['isAvailable'] and d['name'].startswith(family)),None)
+          iphone=existing('iPhone')
+          assert iphone, 'No available iPhone simulator'
+          ipad=existing('iPad')
+          created=False
+          if not ipad:
+              types=json.load(open('devicetypes.json'))['devicetypes']
+              for runtime in runtimes:
+                  version=[int(v) for v in runtime['version'].split('.')]
+                  version=(version+[0,0])[:3]
+                  numeric=(version[0]<<16)+(version[1]<<8)+version[2]
+                  supported={t['identifier'] for t in runtime.get('supportedDeviceTypes',[])}
+                  candidates=[t for t in types if t['productFamily']=='iPad' and (t['identifier'] in supported if supported else t['minRuntimeVersion']<=numeric<=t['maxRuntimeVersion'])]
+                  if candidates:
+                      device=max(candidates,key=lambda t:(t['minRuntimeVersion'],t['name']))
+                      name='Playlist-CI-iPad-'+os.environ['GITHUB_RUN_ID']+'-'+os.environ['GITHUB_RUN_ATTEMPT']
+                      ipad=subprocess.check_output(['xcrun','simctl','create',name,device['identifier'],runtime['identifier']],text=True).strip()
+                      created=True
+                      break
+          assert ipad, 'No supported iPad device type for an available iOS runtime'
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('PLAYLIST_SIMULATOR='+iphone+'\nPLAYLIST_IPAD_SIMULATOR='+ipad+'\n')
+              if created:
+                  env.write('PLAYLIST_CREATED_IPAD='+ipad+'\n')
+          pathlib.Path('evidence/simulators.json').write_text(json.dumps({'iPhone':iphone,'iPad':ipad,'createdIPad':created},indent=2))
+          PYTHON
+      - name: Test the checked-in framework on Simulator
+        run: |
+          xcrun simctl bootstatus "$PLAYLIST_SIMULATOR" -b
+          xcodebuild test -project LibraryMerger.xcodeproj -scheme LibraryMerger \
+            -destination "platform=iOS Simulator,id=$PLAYLIST_SIMULATOR" \
+            -only-testing:LibraryMergerTests -only-testing:LibraryMergerUITests -parallel-testing-enabled NO \
+            -resultBundlePath evidence/PlaylistTests.xcresult CODE_SIGNING_ALLOWED=NO
+      - name: Verify simulator exports
+        run: |
+          # XCTest can leave the destination shut down; lookup requires booted.
+          xcrun simctl bootstatus "$PLAYLIST_SIMULATOR" -b
+          container=$(xcrun simctl get_app_container "$PLAYLIST_SIMULATOR" de.andreas-sk.jwlm data)
+          python3 scripts/verify-export-archives.py "$container/Documents/PlaylistValidation" --report evidence/exports.json
+          python3 scripts/verify-playlist-exports.py "$container/Documents/PlaylistValidation" > evidence/export-contracts.json
+      - name: Test sharing and cancellation on iPad
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          devices=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','--json'],text=True))['devices']
+          if any(d['udid']==os.environ['PLAYLIST_SIMULATOR'] and d['state']=='Booted' for group in devices.values() for d in group):
+              subprocess.check_call(['xcrun','simctl','shutdown',os.environ['PLAYLIST_SIMULATOR']])
+          PY
+          xcrun simctl bootstatus "$PLAYLIST_IPAD_SIMULATOR" -b
+          xcodebuild test -project LibraryMerger.xcodeproj -scheme LibraryMerger \
+            -destination "platform=iOS Simulator,id=$PLAYLIST_IPAD_SIMULATOR" \
+            -only-testing:LibraryMergerUITests -parallel-testing-enabled NO \
+            -resultBundlePath evidence/PlaylistIPadUITests.xcresult CODE_SIGNING_ALLOWED=NO
+      - name: Remove the task-owned fallback iPad
+        if: always() && env.PLAYLIST_CREATED_IPAD != ''
+        run: xcrun simctl delete "$PLAYLIST_CREATED_IPAD"
+      - name: Retain exact-run evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playlist-build-and-contracts
+          path: evidence

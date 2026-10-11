@@ -64,11 +64,6 @@ I would really appreciate it if you could send me a bug report with the error be
 Thank you so much for your help! 😊";
 "errorView.sentryHint" = "You can also decide to automatically send error reports:";
 
-// PlaylistWarningView
-"playlistWarningView.explanation" = "The backup contains playlists that the Library Merger is not able to process yet.
-Please note that playlists won't be included in the merged backup. If you want to keep them, export your playlists via the Share feature in JW Library first and import them again after you restored the merged backup.
-Merging playlists is a feature that I'm currently working on and will be included in a later version of Library Merger. Thank you for your patience 😊";
-
 // BackupIncompatibleView
 "backupIncompatibleView.tooNew" = "The version of the backup you are trying to import is not yet supported with Library Merger.
 Make sure to use the latest version of this app. If you already do, please wait a couple more days until I was able to add support for the latest version JW Library. Thank you for your patience 😊";
@@ -79,3 +74,53 @@ Make sure to export the backup using the latest version of JW Library.";
 // Legal Notice
 "Legal Notice" = "Legal Notice";
 "legalNotice.body" = "This application is not owned or operated by Watch Tower Bible and Tract Society of Pennsylvania, however it is distributed with permission under a license from Watch Tower. All ownership rights to the content within the JW Library® application remain exclusively with Watch Tower Bible and Tract Society of Pennsylvania.\n\nJW Library® is a registered trademark owned exclusively by Watch Tower Bible and Tract Society of Pennsylvania (\"Watch Tower\").";
+
+// Playlist support
+"About playlist merging" = "About playlist merging";
+"Unable to merge playlists" = "Unable to merge playlists";
+"Playlists:" = "Playlists:";
+"Playlist items:" = "Playlist items:";
+"Playlist:" = "Playlist:";
+"Media:" = "Media:";
+"Label:" = "Label:";
+"Start trim:" = "Start trim:";
+"End trim:" = "End trim:";
+"End action:" = "End action:";
+"Accuracy:" = "Accuracy:";
+"Duration:" = "Duration:";
+"Media type:" = "Media type:";
+"Not set" = "Not set";
+"Play next" = "Play next";
+"Stop" = "Stop";
+"Freeze frame" = "Freeze frame";
+"Repeat" = "Repeat";
+"playlist items" = "playlist items";
+"Merging Playlists" = "Merging Playlists";
+"New merge" = "New merge";
+"playlist.support.explanation" = "Playlists with the same name are combined. Entries from both backups are retained, including custom media, order, trims, and end actions. You choose between conflicting settings for the same item. Marker-based clips, multiple media or publication mappings per item, and contradictory item orders are not supported yet.";
+"playlist.support.failure" = "The operation has stopped. No backup will be created with your playlists omitted. Adjust the affected playlist in JW Library and export a new backup. A previously loaded backup remains selected.";
+"help.conflict.playlist items.title" = "Playlist item conflict";
+"help.conflict.playlist items.text" = "The same playlist item has different settings or media duration. Only the differences are shown. Choose the upper version from the left backup or the lower version from the right. All settings shown in that version will be kept. Thumbnails are merged automatically. Other items are retained. Times are shown in seconds.";
+
+"Wait for the current operation to finish." = "Wait for the current operation to finish.";
+
+"Left backup" = "Left backup";
+"Right backup" = "Right backup";
+"Thumbnail:" = "Thumbnail:";
+"Preview unavailable" = "Preview unavailable";
+
+"Name:" = "Name:";
+"What should this item be called?" = "What should this item be called?";
+"Where should playback start?" = "Where should playback start?";
+"Where should playback stop?" = "Where should playback stop?";
+"Which timing accuracy should be used?" = "Which timing accuracy should be used?";
+"What should happen when this item finishes?" = "What should happen when this item finishes?";
+"How long should this item play?" = "How long should this item play?";
+"Which media type should be used?" = "Which media type should be used?";
+"Which settings should this item use?" = "Which settings should this item use?";
+"Choose one version. All settings shown in that version will be kept." = "Choose one version. All settings shown in that version will be kept.";
+"Unable to display this playlist conflict. Please update Library Merger." = "Unable to display this playlist conflict. Please update Library Merger.";
+"Open on jw.org" = "Open on jw.org";
+"Audio" = "Audio";
+"Video" = "Video";
+"Unknown (%@)" = "Unknown (%@)";

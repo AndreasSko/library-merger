@@ -2,13 +2,27 @@ name: SwiftLint
 
 on:
   push:
+  pull_request:
 
 jobs:
   SwiftLint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: GitHub Action for SwiftLint with --strict
+      - uses: actions/checkout@v4
+      - name: Select tracked Swift source
+        run: |
+          python3 - <<'PY'
+          import os, subprocess
+          files=subprocess.check_output(['git','ls-files','-z','*.swift']).decode().split('\0')
+          files=[path for path in files if path]
+          if any('\n' in path or '\r' in path for path in files):
+              raise SystemExit('Tracked Swift filenames must not contain newline or carriage return')
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write(f'SCRIPT_INPUT_FILE_COUNT={len(files)}\n')
+              for index, path in enumerate(files):
+                  env.write(f'SCRIPT_INPUT_FILE_{index}={path}\n')
+          PY
+      - name: Lint tracked source
         uses: norio-nomura/action-swiftlint@3.2.1
         with:
-          args: --strict
+          args: --strict --use-script-input-files --config .swiftlint.yml

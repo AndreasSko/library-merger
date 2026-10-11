@@ -11,26 +11,32 @@ import Gomobile
 struct MergeConflictResolutionView: View {
     @ObservedObject var mergerController: MergerController
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.sizeCategory) private var sizeCategory
     @Binding private var cancelMerge: Bool
     @State private var conflict: MergeConflict
     @State private var selectedSide: MergeSide?
     @State private var helpOpened = false
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
+    private let resolutionID: UUID?
 
-    init (mergerController: MergerController, cancelMerge: Binding<Bool>) {
+    init (mergerController: MergerController, cancelMerge: Binding<Bool>, resolutionID: UUID? = nil) {
         self.mergerController = mergerController
         self._cancelMerge = cancelMerge
+        self.resolutionID = resolutionID ?? mergerController.conflictResolutionID
         do {
-            try _conflict = State(initialValue: mergerController.nextConflict())
+            try _conflict = State(initialValue: mergerController.nextConflict(resolutionID: self.resolutionID))
         } catch {
             _conflict = State(initialValue: MergeConflict(key: "", left: nil, right: nil))
+            _errorMessage = State(initialValue: error.localizedDescription)
+            _showError = State(initialValue: true)
         }
     }
 
     var body: some View {
         NavigationView {
-            VStack {
+            ScrollView {
+                VStack {
                 VStack(alignment: .leading) {
                     HStack {
                         Text("Conflict while merging")
@@ -51,14 +57,22 @@ struct MergeConflictResolutionView: View {
                                                               comment: "Help text for specific conflict"))
                         }
                     }
-                    Text("Which one should be included?")
+                    .fixedSize(horizontal: false, vertical: true)
+                    Text(NSLocalizedString(conflict.playlistPresentation?.question ?? "Which one should be included?",
+                                           comment: "Question for the changed playlist setting"))
+                        .fixedSize(horizontal: false, vertical: true)
+                    if conflict.playlistPresentation?.choosesWholeVersion == true {
+                        Text("Choose one version. All settings shown in that version will be kept.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 .padding()
 
                 MergeConflictOverview(mrt: conflict.left)
                     .padding(.top)
 
-                ScrollView {
                     VStack {
                         MergeConflictDetailsView(conflict: conflict,
                                                  side: .leftSide)
@@ -73,6 +87,7 @@ struct MergeConflictResolutionView: View {
                             .onTapGesture(count: 1, perform: {
                                 selectedSide = .leftSide
                             })
+                            .accessibilityIdentifier("conflict-left")
 
                         MergeConflictDetailsView(conflict: conflict,
                                                  side: .rightSide)
@@ -85,41 +100,61 @@ struct MergeConflictResolutionView: View {
                             .onTapGesture(count: 1, perform: {
                                 selectedSide = .rightSide
                             })
+                            .accessibilityIdentifier("conflict-right")
                     }
                     .frame(maxWidth: .infinity)
-                    Spacer()
+                    .padding(.bottom, 20)
                 }
                 .frame(maxWidth: .infinity)
             }
+            .accessibilityIdentifier("conflict-scroll")
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(leading: (
                 Button(action: {
+                    if let resolutionID = resolutionID {
+                        mergerController.cancelConflictResolution(resolutionID)
+                    }
                     cancelMerge = true
                     presentationMode.wrappedValue.dismiss()
                 }, label: {
                     Text("Cancel")
-                })), trailing: (
+                }).accessibilityIdentifier("cancel-conflicts")), trailing: (
                 Button(action: {
                     do {
-                        try mergerController.mergeConflicts.solveConflict(conflict.key, side: selectedSide?.rawValue)
-                        try conflict = mergerController.nextConflict()
+                        guard let currentResolutionID = resolutionID, let chosenSide = selectedSide else { return }
+                        try mergerController.solveConflict(conflict.key, side: chosenSide,
+                                                           resolutionID: currentResolutionID)
+                        try conflict = mergerController.nextConflict(resolutionID: currentResolutionID)
                         selectedSide = nil
                     } catch MergeError.noConflicts {
                         presentationMode.wrappedValue.dismiss()
                     } catch {
                         errorMessage = error.localizedDescription
-                        showError.toggle()
+                        showError = true
                     }
                 }, label: {
                     Text("Continue")
-                }).disabled(selectedSide == nil)
+                }).disabled(selectedSide == nil || conflict.key.isEmpty || mergerController.isBusy
+                            || resolutionID != mergerController.conflictResolutionID)
+                    .accessibilityIdentifier("continue-conflicts")
                 )
             )
         }
+        .environment(\.sizeCategory, conflictSizeCategory)
         .sheet(isPresented: $showError) {
             ErrorView(error: $errorMessage)
         }
+    }
+
+    private var conflictSizeCategory: ContentSizeCategory {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--playlist-ui-test") && arguments.contains("--playlist-ui-test-largest-text") {
+            return .accessibilityExtraExtraExtraLarge
+        }
+        #endif
+        return sizeCategory
     }
 
     func getConflictType() -> String {
@@ -133,6 +168,8 @@ struct MergeConflictResolutionView: View {
             return "notes"
         case .inputField:
             return "input fields"
+        case .playlistItem, .playlistItemLocationMap, .playlistItemIndependentMediaMap:
+            return "playlist items"
         default:
             return "error"
         }

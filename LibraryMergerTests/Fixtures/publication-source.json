@@ -1,0 +1,33 @@
+{
+  "verifiedOn": "2026-10-12",
+  "metadataSource": "https://b.jw-cdn.org/apis/mediator/v1/media-items/E/pub-jwb-142_1_VIDEO",
+  "sourceURL": "https://www.jw.org/finder?wtlocale=E&lank=pub-jwb-142_1_VIDEO",
+  "title": "JW Broadcasting—October 2026",
+  "naturalKey": "pub-jwb-142_E_1_VIDEO",
+  "languageAgnosticNaturalKey": "pub-jwb-142_1_VIDEO",
+  "firstPublished": "2026-10-05T18:07:06.772Z",
+  "durationSeconds": 3434.64,
+  "location": {
+    "KeySymbol": "jwb-142",
+    "Track": 1,
+    "MepsLanguage": 0,
+    "Type": 3,
+    "IssueTagNumber": 0
+  },
+  "map": {
+    "MajorMultimediaType": 2,
+    "BaseDurationTicks": 34346400000
+  },
+  "fixtures": {
+    "publication-base": "Fictional playlist label/settings with verified publication metadata and fictional PNG",
+    "publication-action": "Only EndAction changes from 0 to 3",
+    "publication-thumbnail-new": "Only thumbnail filename/content changes",
+    "publication-missing-title": "Only Location.Title is null; no catalog/network required",
+    "publication-unknown-language": "Only Location.MepsLanguage is null; do not invent an English source link"
+  },
+  "copyrightBoundary": "No official video or thumbnail bytes included; both PNGs are fictional generated pixels.",
+  "linkVerification": "Both E and X lank finder links return HTTP200 and redirect to localized video pages with exact data-media-item=pub-jwb-142_1_VIDEO. pub/track finder resolves to the home page and is not an acceptable source URL.",
+  "videoPageURL": "https://www.jw.org/en/library/videos/?appLanguage=E&item=pub-jwb-142_1_VIDEO",
+  "germanSourceURL": "https://www.jw.org/finder?wtlocale=X&lank=pub-jwb-142_1_VIDEO",
+  "languageCodeSource": "https://www.jw.org/en/languages/"
+}

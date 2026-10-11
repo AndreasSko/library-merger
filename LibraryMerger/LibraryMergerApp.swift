@@ -17,7 +17,7 @@ struct LibraryMergerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if needsOnboarding {
+            if needsOnboarding && !isPlaylistUITest {
                 OnboardingView(needsOnboarding: $needsOnboarding)
             } else {
                 ContentView(mergerController: mergerController)
@@ -27,6 +27,14 @@ struct LibraryMergerApp: App {
 
     init() {
         setupSentry(enableSentry: enableSentry)
+    }
+
+    private var isPlaylistUITest: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("--playlist-ui-test")
+        #else
+        return false
+        #endif
     }
 
 }

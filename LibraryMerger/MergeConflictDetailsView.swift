@@ -16,6 +16,9 @@ struct MergeConflictDetailsView: View {
         VStack(alignment: .leading) {
             if let conflict = conflict,
                let sideData = side == .leftSide ? conflict.left : conflict.right {
+                Text(side == .leftSide ? "Left backup" : "Right backup")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 switch sideData.model {
                 case .bookmark(let bookmark):
                     BookmarkDetail(bookmark: bookmark)
@@ -25,6 +28,8 @@ struct MergeConflictDetailsView: View {
                     NoteDetail(note: note)
                 case .inputField(let inputfield):
                     InputFieldDetail(inputField: inputfield)
+                case .playlistItem, .playlistItemLocationMap, .playlistItemIndependentMediaMap:
+                    PlaylistChangedDetails(presentation: conflict.playlistPresentation, model: sideData.model)
                 default:
                     Text("Error! Can not generate preview")
                         .foregroundColor(.red)
@@ -34,7 +39,7 @@ struct MergeConflictDetailsView: View {
                     .foregroundColor(.red)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color.white)
         .cornerRadius(10)
@@ -202,4 +207,50 @@ struct CustomAlignment: AlignmentID {
 }
 extension HorizontalAlignment {
     static let custom: HorizontalAlignment = HorizontalAlignment(CustomAlignment.self)
+}
+
+struct PlaylistContext: View {
+    var related: Related?
+    var publication: Publication?
+    var sourceURL: String?
+    var itemTitle: String?
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            let context = PlaylistContextPresentation(related: related, publication: publication, itemTitle: itemTitle)
+            ForEach(context.rows) { row in
+                PlaylistValue(key: row.key, value: row.value)
+            }
+            if let url = PlaylistSourceLink.validatedURL(sourceURL) {
+                Link("Open on jw.org", destination: url)
+            }
+        }
+    }
+
+}
+
+struct PlaylistValue: View {
+    @Environment(\.sizeCategory) private var sizeCategory
+    let key: String
+    let value: String
+
+    var body: some View {
+        Group {
+            if sizeCategory.isAccessibilityCategory {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(NSLocalizedString(key, comment: "Playlist field")).bold()
+                    Text(value)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(NSLocalizedString(key, comment: "Playlist field")).bold()
+                    Spacer(minLength: 12)
+                    Text(value).multilineTextAlignment(.trailing)
+                }
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.bottom, 2)
+    }
 }

@@ -1,43 +1,123 @@
-//
-//  LibraryMergerUITests.swift
-//  LibraryMergerUITests
-//
-//  Created by Andreas Skorczyk on 11.10.20.
-//
-
 import XCTest
 
-class LibraryMergerUITests: XCTestCase {
-
+final class LibraryMergerUITests: XCTestCase {
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required
-        // for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    private func launchPlaylistConflict(left: String = "base", right: String = "conflict",
+                                        largestText: Bool = false) throws -> XCUIApplication {
+        let fixtures = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("LibraryMergerTests/Fixtures")
         let app = XCUIApplication()
+        app.launchArguments = ["--playlist-ui-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        if largestText { app.launchArguments.append("--playlist-ui-test-largest-text") }
+        // The simulator and runner share the build host filesystem. These are synthetic,
+        // task-owned fixtures, never a user's library or a production import bypass.
+        app.launchEnvironment["PLAYLIST_TEST_LEFT"] = fixtures.appendingPathComponent(left + ".jwlibrary").path
+        app.launchEnvironment["PLAYLIST_TEST_RIGHT"] = fixtures.appendingPathComponent(right + ".jwlibrary").path
         app.launch()
-
-        // Use recording to get started writing UI tests.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let merge = app.buttons["merge-backups"]
+        XCTAssertTrue(merge.waitForExistence(timeout: 15))
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"), object: merge)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 15), .completed)
+        merge.tap()
+        XCTAssertTrue(app.buttons["cancel-conflicts"].waitForExistence(timeout: 15))
+        if right == "conflict" { XCTAssertTrue(app.staticTexts["Changed A"].exists) }
+        return app
     }
 
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
+    func testPublicationConflictShowsOnlyChangedActionAndAcceptsRightChoice() throws {
+        try assertPublicationConflictAllowsRightChoice(largestText: false)
+    }
+
+    func testPublicationConflictLargestAccessibilityTextAllowsRightChoice() throws {
+        try assertPublicationConflictAllowsRightChoice(largestText: true)
+    }
+
+    private func assertPublicationConflictAllowsRightChoice(largestText: Bool) throws {
+        let app = try launchPlaylistConflict(left: "publication-base", right: "publication-action",
+                                              largestText: largestText)
+        XCTAssertTrue(app.staticTexts["JW Broadcasting—October 2026"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["What should happen when this item finishes?"].exists)
+        XCTAssertEqual(app.staticTexts.matching(NSPredicate(format: "label == %@", "End action:")).count, 2)
+        for unchanged in ["Start trim:", "End trim:", "Duration:", "Accuracy:", "Thumbnail:", "Media type:"] {
+            XCTAssertFalse(app.staticTexts[unchanged].exists, "Unchanged setting must be omitted: " + unchanged)
         }
+        XCTAssertTrue(app.buttons["Open on jw.org"].exists)
+        XCTAssertFalse(app.buttons["continue-conflicts"].isEnabled)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Publication action choice"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        let choice = app.staticTexts.matching(identifier: "conflict-right")
+            .matching(NSPredicate(format: "label == %@", "Repeat")).firstMatch
+        XCTAssertTrue(choice.waitForExistence(timeout: 5))
+        let scroll = app.scrollViews["conflict-scroll"]
+        XCTAssertTrue(scroll.exists)
+        for _ in 0..<6 {
+            if choice.isHittable { break }
+            scroll.swipeUp()
+        }
+        let hittable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"), object: choice)
+        XCTAssertEqual(XCTWaiter.wait(for: [hittable], timeout: 5), .completed)
+        let scrolled = XCTAttachment(screenshot: app.screenshot())
+        scrolled.name = largestText ? "Largest text right action reachable" : "Right action reachable"
+        scrolled.lifetime = .keepAlways
+        add(scrolled)
+        choice.tap()
+        let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"),
+                                                object: app.buttons["continue-conflicts"])
+        XCTAssertEqual(XCTWaiter.wait(for: [enabled], timeout: 5), .completed)
+        app.buttons["continue-conflicts"].tap()
+        XCTAssertTrue(app.buttons["Export"].waitForExistence(timeout: 15))
+        XCTAssertFalse(app.buttons["cancel-conflicts"].exists)
+    }
+
+    func testCancelRetryChooseRightAndExport() throws {
+        let app = try launchPlaylistConflict()
+        XCTAssertFalse(app.buttons["continue-conflicts"].isEnabled)
+        app.buttons["cancel-conflicts"].tap()
+        let merge = app.buttons["merge-backups"]
+        XCTAssertTrue(merge.waitForExistence(timeout: 5))
+        XCTAssertTrue(merge.isEnabled)
+        merge.tap()
+        XCTAssertTrue(app.buttons["cancel-conflicts"].waitForExistence(timeout: 10))
+        let rightChoice = app.staticTexts.matching(identifier: "conflict-right")
+            .matching(NSPredicate(format: "label == %@", "Changed A")).firstMatch
+        XCTAssertTrue(rightChoice.waitForExistence(timeout: 5))
+        let hittable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"),
+                                                 object: rightChoice)
+        XCTAssertEqual(XCTWaiter.wait(for: [hittable], timeout: 5), .completed)
+        rightChoice.tap()
+        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"),
+                                                 object: app.buttons["continue-conflicts"])
+        XCTAssertEqual(XCTWaiter.wait(for: [selected], timeout: 5), .completed)
+        app.buttons["continue-conflicts"].tap()
+        XCTAssertTrue(app.buttons["Export"].waitForExistence(timeout: 15))
+        app.buttons["Export"].tap()
+        XCTAssertTrue(app.otherElements["ActivityListView"].waitForExistence(timeout: 10))
+        let caption = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH %@", "merged")).firstMatch
+        XCTAssertTrue(caption.waitForExistence(timeout: 30), "Share sheet must finish loading the exported backup")
+        XCTAssertTrue(caption.label.hasPrefix("merged"), "Share sheet must contain the exported backup")
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Resolved playlist export"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    func testNewMergeAfterCancelDoesNotPresentAbandonedConflict() throws {
+        let app = try launchPlaylistConflict()
+        app.buttons["cancel-conflicts"].tap()
+        let reset = app.buttons["new-merge"]
+        XCTAssertTrue(reset.waitForExistence(timeout: 5))
+        reset.tap()
+        XCTAssertFalse(app.buttons["merge-backups"].isEnabled)
+        let reappeared = app.buttons["cancel-conflicts"].waitForExistence(timeout: 2)
+        XCTAssertFalse(reappeared, "An abandoned conflict must not appear after New merge")
+        XCTAssertFalse(app.buttons["new-merge"].exists)
+        XCTAssertEqual(app.staticTexts.matching(identifier: "Select Backup").count, 2)
     }
 }

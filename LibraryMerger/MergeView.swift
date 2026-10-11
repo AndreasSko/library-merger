@@ -15,49 +15,71 @@ struct MergeView: View {
     @Binding var doneMerging: Bool
 
     @State private var isMerging: Bool = false
-    @ObservedObject private var mergeProgress: MergeProgress = MergeProgress()
+    @StateObject private var mergeProgress = MergeProgress()
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
     @State private var showMergeConflictSheet: Bool = false
     @State private var cancelMerge: Bool = false
+    @State private var resolutionID: UUID?
+    @State private var presentationSessionID: UUID?
 
     var body: some View {
         VStack {
             HStack {
                 Button(action: {
+                    let requestedSessionID = mergerController.sessionID
                     Task {
+                        guard requestedSessionID == mergerController.sessionID else { return }
                         doneMerging = false
                         cancelMerge = false
                         isMerging = true
                         mergeProgress.percent = 1
                         mergeProgress.status = "Merging.."
 
-                        doneMerging = await merge()
+                        let merged = await merge()
+                        guard requestedSessionID == mergerController.sessionID else { return }
+                        doneMerging = merged
                         isMerging = false
                     }
 
                 }, label: {
                     Text("Merge")
                 })
-                .disabled(!enabled)
+                .disabled(!enabled || mergerController.isBusy || isMerging
+                          || mergerController.conflictResolutionID != nil)
+                .accessibilityIdentifier("merge-backups")
             }
             .font(.title2)
             .padding()
             .sheet(isPresented: $showError) {
-                ErrorView(error: $errorMessage)
+                if isPlaylistError(errorMessage) {
+                    PlaylistWarningView(error: errorMessage)
+                } else {
+                    ErrorView(error: $errorMessage)
+                }
             }
             .fullScreenCover(isPresented: $showMergeConflictSheet, onDismiss: {
+                guard presentationSessionID == mergerController.sessionID else { return }
+                let dismissedSessionID = presentationSessionID
+                let dismissedResolutionID = resolutionID
                 Task {
+                    guard dismissedSessionID == mergerController.sessionID else { return }
                     if cancelMerge {
                         doneMerging = false
                         isMerging = false
                         mergeProgress.percent = 0
-                    } else {
-                        doneMerging = await merge(reset: false)
+                    } else if dismissedResolutionID == mergerController.conflictResolutionID,
+                              dismissedResolutionID != nil {
+                        isMerging = true
+                        let merged = await merge(reset: false, resolutionID: dismissedResolutionID)
+                        guard dismissedSessionID == mergerController.sessionID else { return }
+                        doneMerging = merged
+                        isMerging = false
                     }
                 }
             }, content: {
-                MergeConflictResolutionView(mergerController: mergerController, cancelMerge: $cancelMerge)
+                MergeConflictResolutionView(mergerController: mergerController, cancelMerge: $cancelMerge,
+                                            resolutionID: resolutionID)
             })
 
             if !doneMerging && mergeProgress.percent > 0 && mergeProgress.percent < 100 {
@@ -75,21 +97,26 @@ struct MergeView: View {
         }
     }
 
-    func merge(reset: Bool = true) async -> Bool {
+    @MainActor
+    func merge(reset: Bool = true, resolutionID: UUID? = nil) async -> Bool {
+        let sessionID = mergerController.sessionID
         do {
-            try await mergerController.merge(reset: reset, progress: mergeProgress)
+            try await mergerController.merge(reset: reset, progress: mergeProgress,
+                                             resolutionID: resolutionID, sessionID: sessionID)
         } catch MergeError.mergeConflict {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                showMergeConflictSheet.toggle()
-            }
+            guard sessionID == mergerController.sessionID else { return false }
+            self.resolutionID = mergerController.conflictResolutionID
+            presentationSessionID = sessionID
+            showMergeConflictSheet = true
 
             return false
         } catch {
+            guard sessionID == mergerController.sessionID else { return false }
             errorMessage = error.localizedDescription
             showError = true
             return false
         }
-        return true
+        return sessionID == mergerController.sessionID
     }
 }
 

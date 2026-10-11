@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @State var selection: String?
-    @AppStorage("warnOnPlaylist") private var warnOnPlaylist: Bool = true
 
     init() {}
     init(selection: String) {
@@ -38,8 +37,8 @@ struct SettingsView: View {
                         Text("Show Tutorial again")
                     })
 
-                    Toggle(isOn: $warnOnPlaylist) {
-                        Text("Warn if backup contains playlist")
+                    NavigationLink(destination: PlaylistWarningView()) {
+                        Text("About playlist merging")
                     }
 
                     #if DEBUG

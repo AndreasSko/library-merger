@@ -11,6 +11,8 @@ struct Related: Decodable {
     let blockRange: [BlockRange]?
     let bookmark: Bookmark?
     let inputField: InputField?
+    let independentMedia: IndependentMedia?
+    let playlistItem: PlaylistItem?
     let location: Location?
     let publicationLocation: Location?
     let note: Note?
@@ -24,6 +26,8 @@ enum Model: Decodable {
     enum CodingKeys: String, CodingKey {
         case modelType = "type"
     }
+    // One branch per Go model discriminator is the wire-format contract.
+    // swiftlint:disable:next cyclomatic_complexity
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let modelType = try container.decode(String.self, forKey: .modelType)
@@ -55,11 +59,21 @@ enum Model: Decodable {
         case "UserMarkBlockRange":
             let mdl = try UserMarkBlockRange(from: decoder)
             self = .userMarkBlockRange(mdl)
+        case "PlaylistItem":
+            self = .playlistItem(try PlaylistItem(from: decoder))
+        case "PlaylistItemLocationMap":
+            self = .playlistItemLocationMap(try PlaylistItemLocationMap(from: decoder))
+        case "PlaylistItemIndependentMediaMap":
+            self = .playlistItemIndependentMediaMap(try PlaylistItemIndependentMediaMap(from: decoder))
         default:
-            fatalError()
+            throw DecodingError.dataCorruptedError(forKey: .modelType, in: container,
+                                                  debugDescription: "Unsupported conflict type: \(modelType)")
         }
     }
 
+    case playlistItem(PlaylistItem)
+    case playlistItemLocationMap(PlaylistItemLocationMap)
+    case playlistItemIndependentMediaMap(PlaylistItemIndependentMediaMap)
     case blockRange(BlockRange)
     case bookmark(Bookmark)
     case inputField(InputField)
@@ -126,7 +140,6 @@ struct Tag: Decodable {
     let tagId: Int
     let tagType: Int
     let name: String
-    let imageFilename: NullString
 }
 
 struct TagMap: Decodable {
@@ -180,4 +193,55 @@ struct NullString: Decodable {
 
     let string: String
     let valid: Bool
+}
+
+struct PlaylistItem: Decodable {
+    let playlistItemId: Int
+    let label: String
+    let startTrimOffsetTicks: NullInt64
+    let endTrimOffsetTicks: NullInt64
+    let accuracy: Int
+    let endAction: Int
+    let thumbnailFilePath: NullString
+
+    var endActionName: String {
+        switch endAction {
+        case 0: return "Play next"
+        case 1: return "Stop"
+        case 2: return "Freeze frame"
+        case 3: return "Repeat"
+        default: return String(endAction)
+        }
+    }
+}
+
+struct IndependentMedia: Decodable {
+    let independentMediaId: Int
+    let originalFilename: String
+    let filePath: String
+    let mimeType: String
+    let hash: String
+}
+
+struct PlaylistItemLocationMap: Decodable {
+    let playlistItemId: Int
+    let locationId: Int
+    let majorMultimediaType: Int
+    let baseDurationTicks: NullInt64
+}
+
+struct PlaylistItemIndependentMediaMap: Decodable {
+    let playlistItemId: Int
+    let independentMediaId: Int
+    let durationTicks: Int64
+}
+
+func formatPlaylistTicks(_ ticks: Int64) -> String {
+    // Preserve each 100-nanosecond tick, including Int64.min's unsigned magnitude.
+    let magnitude = ticks.magnitude
+    let whole = magnitude / 10_000_000
+    let remainder = String(magnitude % 10_000_000)
+    var fraction = String(repeating: "0", count: 7 - remainder.count) + remainder
+    while fraction.count > 3 && fraction.last == "0" { fraction.removeLast() }
+    return (ticks < 0 ? "-" : "") + String(whole) + "." + fraction + " s"
 }

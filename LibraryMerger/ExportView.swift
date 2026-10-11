@@ -19,26 +19,35 @@ struct ExportView: View {
     var body: some View {
         VStack {
             Button("Export") {
+                let requestedSessionID = mergerController.sessionID
                 Task {
+                    guard requestedSessionID == mergerController.sessionID else { return }
                     isExporting = true
                     do {
-                        let path = try await mergerController.exportBackup()
+                        let path = try await mergerController.exportBackup(sessionID: requestedSessionID)
+                        guard requestedSessionID == mergerController.sessionID else { return }
                         isExporting = false
                         exportedURL = NSURL.fileURL(withPath: path)
-                        isSharing.toggle()
+                        isSharing = true
                     } catch {
+                        guard requestedSessionID == mergerController.sessionID else { return }
                         isExporting = false
                         errorMessage = error.localizedDescription
                         showError = true
                     }
                 }
             }
+            .disabled(isExporting || mergerController.isBusy)
             if isExporting {
                 ProgressView()
             }
         }
         .sheet(isPresented: $showError) {
-            ErrorView(error: $errorMessage)
+            if isPlaylistError(errorMessage) {
+                PlaylistWarningView(error: errorMessage)
+            } else {
+                ErrorView(error: $errorMessage)
+            }
         }
         .sheet(isPresented: $isSharing, content: {
             ShareView(url: self.$exportedURL)

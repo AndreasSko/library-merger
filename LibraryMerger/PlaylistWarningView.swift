@@ -1,39 +1,27 @@
-//
-//  PlaylistWarningView.swift
-//  LibraryMerger
-//
-//  Created by Andreas Skorczyk on 19.07.23.
-//
-
 import SwiftUI
 
+// Also used from Settings to explain which playlist features are supported.
 struct PlaylistWarningView: View {
-
-    @AppStorage("warnOnPlaylist") private var warnOnPlaylist: Bool = true
+    var error: String?
 
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Label("Can't merge playlists",
-                      systemImage: "exclamationmark.triangle")
-                .font(.title)
-                Spacer()
-            }.padding(.bottom, 5)
-
-            Text("playlistWarningView.explanation")
-            Spacer()
-            HStack {
-                Toggle(isOn: $warnOnPlaylist) {
-                    Text("Warn if backup contains playlist")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Label(error == nil ? "About playlist merging" : "Unable to merge playlists",
+                      systemImage: error == nil ? "music.note.list" : "exclamationmark.triangle")
+                    .font(.title)
+                Text("playlist.support.explanation")
+                if let error = error {
+                    Text("playlist.support.failure")
+                    Text(error).font(.footnote)
                 }
             }
+            .padding()
         }
-        .padding()
     }
 }
 
-struct PlaylistWarningView_Previews: PreviewProvider {
-    static var previews: some View {
-        PlaylistWarningView()
-    }
+func isPlaylistError(_ message: String) -> Bool {
+    let message = message.lowercased()
+    return message.contains("playlist") || message.contains("independentmedia")
 }

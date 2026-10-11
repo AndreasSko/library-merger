@@ -92,3 +92,12 @@ fastlane/test_output
 iOSInjectionProject/
 LibraryMerger.xcodeproj/project.xcworkspace/xcuserdata/askorczyk.xcuserdatad/UserInterfaceState.xcuserstate
 LibraryMerger.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# Local original backups used only for integration validation
+LibraryMergerTests/Fixtures/Original/
+
+# Local candidate builds and Python validation caches
+.release/
+*.xcarchive/
+__pycache__/
+*.pyc

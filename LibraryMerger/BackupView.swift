@@ -13,8 +13,6 @@ struct BackupView: View {
     var side: MergeSide
     @ObservedObject var mergerController: MergerController
 
-    @AppStorage("warnOnPlaylist") private var warnOnPlaylist: Bool = true
-
     @Binding var sharedUrl: URL?
     @Binding var fileSelected: Bool
     @Binding var doneMerging: Bool
@@ -24,8 +22,7 @@ struct BackupView: View {
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
     @State private var dbStats: GomobileDatabaseStats = GomobileDatabaseStats()
-    @State private var containsPlaylists: Bool = true
-    @State private var showPlaylistWarning: Bool = false
+    @State private var pickerSessionID: UUID?
 
     var body: some View {
         let screenWidth = UIScreen.main.bounds.size.width
@@ -36,9 +33,7 @@ struct BackupView: View {
                         ProgressView()
                     } else if !fileSelected {
                         Button(action: {
-                            Task {
-                                await wasPressed()
-                            }
+                            beginSelection()
                         }, label: {
                             Image(systemName: "square.and.arrow.down")
                         })
@@ -96,6 +91,18 @@ struct BackupView: View {
                                     .font(.callout)
                                     .alignmentGuide(.custom) { $0[.leading] }
                             }
+                            HStack {
+                                Text("Playlists:").bold().padding(.trailing, -7)
+                                Text(String(dbStats.playlist))
+                                    .font(.callout)
+                                    .alignmentGuide(.custom) { $0[.leading] }
+                            }
+                            HStack {
+                                Text("Playlist items:").bold().padding(.trailing, -7)
+                                Text(String(dbStats.playlistItem))
+                                    .font(.callout)
+                                    .alignmentGuide(.custom) { $0[.leading] }
+                            }
                         }
                         .padding(.vertical)
                         .padding(.bottom, -10)
@@ -103,29 +110,10 @@ struct BackupView: View {
                             view.font(.callout)
                         }
 
-                        if containsPlaylists {
-                            VStack {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .font(.title)
-                                    .foregroundColor(.orange)
-
-                                Text("Contains playlists")
-                                    .font(.caption)
-                                    .bold()
-                                    .foregroundColor(.orange)
-                                    .padding(.bottom)
-                            }
-                            .onTapGesture {
-                                Task {
-                                    showPlaylistWarning.toggle()
-                                }
-                            }
-                        } else {
-                            Image(systemName: "checkmark.circle")
-                                .font(.title)
-                                .foregroundColor(.green)
-                                .padding(.bottom)
-                        }
+                        Image(systemName: "checkmark.circle")
+                            .font(.title)
+                            .foregroundColor(.green)
+                            .padding(.bottom)
                     }
                 }
                 .if(sharedUrl != nil) { view in
@@ -135,9 +123,7 @@ struct BackupView: View {
                 if sharedUrl != nil {
                     VStack {
                         Button(action: {
-                            Task {
-                                await wasPressed()
-                            }
+                            beginSelection()
                         }, label: {
                             Image(systemName: "plus.circle")
                         })
@@ -161,61 +147,73 @@ struct BackupView: View {
         .shadow(color: Color.gray.opacity(0.2), radius: 20)
         .contentShape(Rectangle())
         .onTapGesture {
-            Task {
-                await wasPressed()
-            }
+            beginSelection()
         }
         .sheet(isPresented: $showError) {
             if errorMessage.lowercased().contains("backup incompatible") {
                 BackupIncompatibleView(error: $errorMessage)
+            } else if isPlaylistError(errorMessage) {
+                PlaylistWarningView(error: errorMessage)
             } else {
                 ErrorView(error: $errorMessage)
             }
         }
-        .sheet(isPresented: $showPlaylistWarning) {
-            PlaylistWarningView()
-        }
         .fileImporter(isPresented: $isSelectingFile,
                       allowedContentTypes: [.jwlibrary]) { (result) in
+            guard let requestedSessionID = pickerSessionID,
+                  requestedSessionID == mergerController.sessionID else { return }
             Task {
-                isImporting.toggle()
+                guard requestedSessionID == mergerController.sessionID else { return }
+                isImporting = true
                 do {
                     let url = try result.get()
-                    await importBackup(url: url)
+                    await importBackup(url: url, sessionID: requestedSessionID)
                 } catch {
+                    guard requestedSessionID == mergerController.sessionID else { return }
                     isImporting = false
                     errorMessage = error.localizedDescription
                     showError = true
                 }
-                isImporting = false
+                if requestedSessionID == mergerController.sessionID { isImporting = false }
             }
         }
     }
 
-    func wasPressed() async {
+    @MainActor
+    private func beginSelection() {
+        let requestedSessionID = mergerController.sessionID
+        Task { await wasPressed(sessionID: requestedSessionID) }
+    }
+
+    @MainActor
+    func wasPressed(sessionID: UUID) async {
+        guard sessionID == mergerController.sessionID else { return }
         doneMerging = false
-        if sharedUrl != nil {
-            await importBackup(url: sharedUrl!)
-            sharedUrl = nil
+        if let url = sharedUrl {
+            await importBackup(url: url, sessionID: sessionID)
+            if sessionID == mergerController.sessionID { sharedUrl = nil }
         } else {
-            isSelectingFile.toggle()
+            pickerSessionID = sessionID
+            isSelectingFile = true
         }
     }
 
-    func importBackup(url: URL) async {
+    @MainActor
+    func importBackup(url: URL, sessionID: UUID) async {
+        guard sessionID == mergerController.sessionID else { return }
+        isImporting = true
+        defer { if sessionID == mergerController.sessionID { isImporting = false } }
         do {
-            try await mergerController.importBackup(url: url, side: side)
+            try await mergerController.importBackup(url: url, side: side, sessionID: sessionID)
+            guard sessionID == mergerController.sessionID else { return }
             fileSelected = true
             dbStats = mergerController.dbWrapper.stats(side.rawValue)!
         } catch {
+            guard sessionID == mergerController.sessionID else { return }
             errorMessage = error.localizedDescription
             showError = true
         }
 
-        containsPlaylists = mergerController.dbWrapper.dbContainsPlaylists(side.rawValue)
-        if containsPlaylists && warnOnPlaylist {
-            showPlaylistWarning.toggle()
-        }
     }
 }
 

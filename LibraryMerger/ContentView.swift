@@ -27,6 +27,17 @@ struct ContentView: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.leading)
                 Spacer()
+                if leftSelected || rightSelected {
+                    Button("New merge") {
+                        mergerController.resetSession()
+                        leftSelected = false
+                        rightSelected = false
+                        doneMerging = false
+                        sharedUrl = nil
+                    }
+                    .disabled(mergerController.isBusy)
+                    .accessibilityIdentifier("new-merge")
+                }
             }
             .padding()
             VStack {
@@ -36,15 +47,19 @@ struct ContentView: View {
                                sharedUrl: $sharedUrl,
                                fileSelected: $leftSelected,
                                doneMerging: $doneMerging)
+                        .id("\(mergerController.sessionID)-left")
                     BackupView(side: MergeSide.rightSide,
                                mergerController: mergerController,
                                sharedUrl: $sharedUrl,
                                fileSelected: $rightSelected,
                                doneMerging: $doneMerging)
+                        .id("\(mergerController.sessionID)-right")
                 }.padding(.horizontal)
+                    .disabled(mergerController.isBusy || mergerController.conflictResolutionID != nil)
             }
 
             MergeSettingsView(mergerController: mergerController)
+                .disabled(mergerController.isBusy || mergerController.conflictResolutionID != nil)
                 .background(Color.white)
                 .cornerRadius(10)
                 .overlay(
@@ -57,6 +72,7 @@ struct ContentView: View {
             MergeView(mergerController: mergerController,
                       enabled: leftSelected && rightSelected,
                       doneMerging: $doneMerging)
+                .id(mergerController.sessionID)
 
             Spacer()
 
@@ -90,6 +106,23 @@ struct ContentView: View {
         .onOpenURL { url in
             sharedUrl = url
         }
+        #if DEBUG
+        .task {
+            // UI tests supply task-owned archives; release builds have no fixture entry point.
+            let environment = ProcessInfo.processInfo.environment
+            guard ProcessInfo.processInfo.arguments.contains("--playlist-ui-test"),
+                  let left = environment["PLAYLIST_TEST_LEFT"],
+                  let right = environment["PLAYLIST_TEST_RIGHT"] else { return }
+            do {
+                try await mergerController.importBackup(url: URL(fileURLWithPath: left), side: .leftSide)
+                try await mergerController.importBackup(url: URL(fileURLWithPath: right), side: .rightSide)
+                leftSelected = true
+                rightSelected = true
+            } catch {
+                assertionFailure("UI fixture import failed: \(error)")
+            }
+        }
+        #endif
     }
 }
 

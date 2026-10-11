@@ -39,6 +39,8 @@ of the slices.
 @property (nonatomic) long tag;
 @property (nonatomic) long tagMap;
 @property (nonatomic) long userMark;
+@property (nonatomic) long playlist;
+@property (nonatomic) long playlistItem;
 @end
 
 /**
@@ -52,6 +54,10 @@ Database structs so they can be used with Gomobile.
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 @property (nonatomic) NSString* _Nonnull tempDir;
+/**
+ * Close releases temporary media owned by this wrapper. Call after export or cancellation.
+ */
+- (BOOL)close:(NSError* _Nullable* _Nullable)error;
 /**
  * DBContainsPlaylists indicates if a DB on the given side contains playlists.
  */
@@ -91,6 +97,11 @@ function calls. Should be called after ImportJWLBackup.
  */
 - (BOOL)mergeNotes:(NSString* _Nullable)conflictSolver mcw:(GomobileMergeConflictsWrapper* _Nullable)mcw error:(NSError* _Nullable* _Nullable)error;
 /**
+ * MergePlaylists merges playlist items and media after MergeLocations and
+MergeTags. Conflicts can be resolved with chooseLeft/chooseRight or mcw.
+ */
+- (BOOL)mergePlaylists:(NSString* _Nullable)conflictSolver mcw:(GomobileMergeConflictsWrapper* _Nullable)mcw error:(NSError* _Nullable* _Nullable)error;
+/**
  * MergeTagMaps merges tagMaps
  */
 - (BOOL)mergeTagMaps:(NSError* _Nullable* _Nullable)error;
@@ -102,6 +113,7 @@ function calls. Should be called after ImportJWLBackup.
  * MergeUserMarkAndBlockRange merges UserMarks and BlockRanges
  */
 - (BOOL)mergeUserMarkAndBlockRange:(NSString* _Nullable)conflictSolver mcw:(GomobileMergeConflictsWrapper* _Nullable)mcw error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)playlistThumbnail:(NSString* _Nullable)side playlistItemID:(long)playlistItemID error:(NSError* _Nullable* _Nullable)error;
 /**
  * SkipPlaylists allows to skip the check if playlists exist in the database.
 It is meant as a temporary workaround until merging of playlists is implemented.
@@ -123,7 +135,6 @@ to check progress and also cancel the download if necessary
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-@property (nonatomic) GomobileDownloadProgress* _Nullable progress;
 /**
  * CancelDownload cancels a running download
  */
@@ -136,6 +147,10 @@ to check progress and also cancel the download if necessary
  * Error returns possible errors of a download as a string
  */
 - (NSString* _Nonnull)error;
+/**
+ * GetProgress returns a snapshot that stays unchanged as the download advances.
+ */
+- (GomobileDownloadProgress* _Nullable)getProgress;
 @end
 
 /**
@@ -169,6 +184,7 @@ to make it compatible with Gomobile.
 @property (nonatomic) NSString* _Nonnull key;
 @property (nonatomic) NSString* _Nonnull left;
 @property (nonatomic) NSString* _Nonnull right;
+@property (nonatomic) NSString* _Nonnull changedFields;
 @end
 
 /**

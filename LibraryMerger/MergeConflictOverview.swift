@@ -25,6 +25,12 @@ struct MergeConflictOverview: View {
                 NoteOverview(note: note, related: related, publication: publication)
             case .inputField(let inputField):
                 InputFieldOverview(inputField: inputField, related: related, publication: publication)
+            case .playlistItem(let item):
+                PlaylistContext(related: related, publication: publication, sourceURL: mrt?.sourceURL,
+                                itemTitle: item.label).padding(.horizontal)
+            case .playlistItemLocationMap, .playlistItemIndependentMediaMap:
+                PlaylistContext(related: related, publication: publication, sourceURL: mrt?.sourceURL,
+                                itemTitle: related?.playlistItem?.label).padding(.horizontal)
             default:
                 Text("An error occurred")
             }

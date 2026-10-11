@@ -1,0 +1,28 @@
+{
+  "files": {
+    "Gomobile.xcframework/Info.plist": "39fd32af49020b363c8c21615b47d849b6aa8614e24368929ff8d1da4acce718",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Gomobile": "4ac9c8698fd51a6042abd13570729181d56295ca0e0d24b92b8e2d4e33b003e3",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Headers/Gomobile.h": "e515c3561b68660e58047af9218c18e2beddbc90765277985191509f16866cc7",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Headers/Gomobile.objc.h": "0977ad5c62655976a8c54ed393459ee01615afea4d82bd91d101c328956ac385",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Headers/Universe.objc.h": "61b1a0cd75801d2d8d1d82ef2accda4477966c691795473d696e45de05fcbc7b",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Headers/ref.h": "d76b969941e61d61551ae1e6b7ddc674ac898d422f28cb5dbf8d640ba2ae8df6",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Info.plist": "f8b3233819a45fcf41dcf1b8a237ab4836d8f1d8197172caaa8f9aeee78ed9f1",
+    "Gomobile.xcframework/ios-arm64/Gomobile.framework/Modules/module.modulemap": "f831be6c318473ab39d5453acd88f40c32c093715b70bff77f4607bd6a7d6b1a",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Gomobile": "6905fa8a89d5d09b5186919722a1fe42804f126a922f11f90c4edd27fb451fc0",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Headers/Gomobile.h": "e515c3561b68660e58047af9218c18e2beddbc90765277985191509f16866cc7",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Headers/Gomobile.objc.h": "0977ad5c62655976a8c54ed393459ee01615afea4d82bd91d101c328956ac385",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Headers/Universe.objc.h": "61b1a0cd75801d2d8d1d82ef2accda4477966c691795473d696e45de05fcbc7b",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Headers/ref.h": "d76b969941e61d61551ae1e6b7ddc674ac898d422f28cb5dbf8d640ba2ae8df6",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Info.plist": "f8b3233819a45fcf41dcf1b8a237ab4836d8f1d8197172caaa8f9aeee78ed9f1",
+    "Gomobile.xcframework/ios-arm64_x86_64-simulator/Gomobile.framework/Modules/module.modulemap": "f831be6c318473ab39d5453acd88f40c32c093715b70bff77f4607bd6a7d6b1a"
+  },
+  "goVersion": "go version go1.27.1 darwin/arm64",
+  "gomobileVersion": "v0.0.0-20260508232728-bebd421c7fa8",
+  "invocation": "gomobile bind -target=ios -o ../ios-jwlm/Gomobile.xcframework ./gomobile",
+  "module": "github.com/AndreasSko/go-library-merger",
+  "sourceCommit": "df219073073090aee2695cdc2ef4b3f2a69a2003",
+  "sourceFingerprintSha256": "e7be30146e4b1e38743804196fef61b514e53c0a7ca8b0274e336dc097ca6753",
+  "sourceInventory": "Tracked Go files, go.mod, go.sum and model/data/userData.db",
+  "sourceRepository": "https://github.com/AndreasSko/go-library-merger",
+  "xcodeVersion": "Xcode 27.0\nBuild version 27A266a"
+}

@@ -18,12 +18,14 @@ enum MergeSide: String {
 struct ModelRelatedTuple: Decodable {
     let model: Model
     let related: Related
+    let sourceURL: String?
 }
 
 struct MergeConflict {
     let key: String
     let left: ModelRelatedTuple?
     let right: ModelRelatedTuple?
+    var playlistPresentation: PlaylistConflictPresentation?
 }
 
 enum ConflictSolver: String {
@@ -51,46 +53,14 @@ class MergeProgress: ObservableObject {
     }
 }
 
-enum GeneralError: Error {
-    case general(message: String)
-    case timeout(message: String)
-}
-
-extension GeneralError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .timeout(let message), .general(let message):
-            return message
-        }
-    }
-}
-
-enum MergeError: Error {
-    case notInitialized(message: String)
-    case mergeConflict
-    case noConflicts
-    case error(message: String)
-}
-
-extension MergeError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .notInitialized(let message):
-            return message
-        case .error(let message):
-            return message
-        default:
-            return ""
-        }
-    }
-}
-
 class MergerController: ObservableObject {
+    @Published private(set) var isBusy = false
+    @Published private(set) var sessionID = UUID()
+    @Published private(set) var conflictResolutionID: UUID?
+    private var hasMergedBackup = false
     var dbWrapper: GomobileDatabaseWrapper
     var mergeConflicts: GomobileMergeConflictsWrapper
     var settings: MergeSettings
-
-    private var solvedConflicts = 0
 
     init() {
         addBreadcrumb("MergerController.init")
@@ -104,9 +74,83 @@ class MergerController: ObservableObject {
                                       inputFieldResolver: .disabled)
     }
 
-    func importBackup(url: URL, side: MergeSide) async throws {
+    deinit {
+        // Imported media is needed across conflict retries and repeated exports.
+        // The wrapper releases replaced inputs itself; close only at session end.
+        try? dbWrapper.close()
+    }
+
+    @MainActor
+    func resetSession() {
+        guard !isBusy else { return }
+        conflictResolutionID = nil
+        hasMergedBackup = false
+        sessionID = UUID()
+        try? dbWrapper.close()
+        dbWrapper = GomobileDatabaseWrapper()
+        dbWrapper.tempDir = getTempDir()
+        mergeConflicts = GomobileMergeConflictsWrapper()
+        mergeConflicts.initDBWrapper(dbWrapper)
+    }
+
+    func importBackup(url: URL, side: MergeSide, sessionID: UUID? = nil) async throws {
+        try await withOperation(sessionID: sessionID) {
+            try await self.importBackupImpl(url: url, side: side)
+            await MainActor.run { self.hasMergedBackup = false }
+        }
+    }
+
+    func merge(reset: Bool = true, progress: MergeProgress, resolutionID: UUID? = nil,
+               sessionID: UUID? = nil) async throws {
+        try await withOperation(allowConflicts: true, resolutionID: resolutionID, sessionID: sessionID) {
+            await MainActor.run {
+                self.conflictResolutionID = nil
+                self.hasMergedBackup = false
+            }
+            do {
+                try await self.mergeImpl(reset: reset, progress: progress)
+                await MainActor.run { self.hasMergedBackup = true }
+            } catch MergeError.mergeConflict {
+                await MainActor.run { self.conflictResolutionID = UUID() }
+                throw MergeError.mergeConflict
+            }
+        }
+    }
+
+    private func withOperation<T>(allowConflicts: Bool = false, resolutionID: UUID? = nil,
+                                  sessionID: UUID? = nil,
+                                  _ operation: () async throws -> T) async throws -> T {
+        try await MainActor.run {
+            if let sessionID = sessionID, sessionID != self.sessionID {
+                throw GeneralError.general(message: NSLocalizedString("Wait for the current operation to finish.",
+                                                                      comment: "Busy merge session"))
+            }
+            if let resolutionID = resolutionID { try self.requireConflictResolution(resolutionID) }
+            guard !self.isBusy && (allowConflicts || self.conflictResolutionID == nil) else {
+                throw GeneralError.general(message: NSLocalizedString("Wait for the current operation to finish.",
+                                                                      comment: "Busy merge session"))
+            }
+            self.isBusy = true
+        }
+        do {
+            let result = try await operation()
+            await MainActor.run { self.isBusy = false }
+            return result
+        } catch {
+            await MainActor.run { self.isBusy = false }
+            throw error
+        }
+    }
+
+    @MainActor
+    func solveConflict(_ key: String, side: MergeSide, resolutionID: UUID) throws {
+        try requireConflictResolution(resolutionID)
+        try mergeConflicts.solveConflict(key, side: side.rawValue)
+    }
+
+    private func importBackupImpl(url: URL, side: MergeSide) async throws {
         addBreadcrumb("importBackup from \(url.absoluteString) for side \(side.rawValue)")
-        self.dbWrapper.skipPlaylists(true)
+        self.dbWrapper.skipPlaylists(false)
 
         let accessGranted = url.startAccessingSecurityScopedResource()
         defer { url.stopAccessingSecurityScopedResource() }
@@ -176,7 +220,7 @@ class MergerController: ObservableObject {
         }
     }
 
-    func exportBackup() async throws -> String {
+    private func exportBackupImpl() async throws -> String {
         addBreadcrumb("exportBackup")
         do {
             cleanUpMergedFiles()
@@ -200,13 +244,13 @@ class MergerController: ObservableObject {
     // cleanUpMergedFiles removes all files starting with `merged` from the documentDirectory,
     // as they are the result of older merges
     func cleanUpMergedFiles() {
-        let fm = FileManager.default
+        let fileManager = FileManager.default
         do {
-            let dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first
-            let files = try fm.contentsOfDirectory(at: dir!.absoluteURL,
+            let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            let files = try fileManager.contentsOfDirectory(at: dir!.absoluteURL,
                                                    includingPropertiesForKeys: [.isRegularFileKey])
             for file in files where file.lastPathComponent.hasPrefix("merged") {
-                try fm.removeItem(at: file)
+                try fileManager.removeItem(at: file)
                 print("Cleaning up \(file.absoluteString)")
             }
         } catch {
@@ -217,13 +261,14 @@ class MergerController: ObservableObject {
 
     // cleanUpInbox removes all files inside the inbox
     func cleanUpInbox() {
-        let fm = FileManager.default
+        let fileManager = FileManager.default
         do {
-            let dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Inbox")
-            let files = try fm.contentsOfDirectory(at: dir!.absoluteURL,
+            let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?
+                .appendingPathComponent("Inbox")
+            let files = try fileManager.contentsOfDirectory(at: dir!.absoluteURL,
                                                    includingPropertiesForKeys: [.isRegularFileKey])
             for file in files {
-                try fm.removeItem(at: file)
+                try fileManager.removeItem(at: file)
             }
         } catch {
             let nsError = error as NSError
@@ -235,7 +280,7 @@ class MergerController: ObservableObject {
         }
     }
 
-    func merge(reset: Bool = true, progress: MergeProgress) async throws {
+    private func mergeImpl(reset: Bool, progress: MergeProgress) async throws {
         addBreadcrumb("merge")
         if !self.dbWrapper.dbIsLoaded(MergeSide.leftSide.rawValue)
            || !self.dbWrapper.dbIsLoaded(MergeSide.rightSide.rawValue) {
@@ -267,6 +312,10 @@ class MergerController: ObservableObject {
             await progress.update(status: "Merging Notes", percent: 84)
             try dbWrapper.mergeNotes(self.settings.noteResolver.rawValue, mcw: self.mergeConflicts)
 
+            await progress.update(status: NSLocalizedString("Merging Playlists", comment: "Merge progress"),
+                                  percent: 91)
+            try dbWrapper.mergePlaylists("", mcw: self.mergeConflicts)
+
             await progress.update(status: "Merging TagMaps", percent: 98)
             try dbWrapper.mergeTagMaps()
 
@@ -280,7 +329,43 @@ class MergerController: ObservableObject {
         }
     }
 
-    func nextConflict() throws -> MergeConflict {
+}
+
+extension MergerController {
+    private func requireConflictResolution(_ resolutionID: UUID) throws {
+        guard !isBusy, conflictResolutionID == resolutionID else {
+            throw GeneralError.general(message: NSLocalizedString("Wait for the current operation to finish.",
+                                                                  comment: "Busy merge session"))
+        }
+    }
+}
+
+extension MergerController {
+    func exportBackup(sessionID: UUID? = nil) async throws -> String {
+        try await withOperation(sessionID: sessionID) {
+            try await MainActor.run {
+                guard self.hasMergedBackup else {
+                    throw MergeError.notInitialized(message: "There is no merged backup yet")
+                }
+            }
+            return try await self.exportBackupImpl()
+        }
+    }
+}
+
+extension MergerController {
+    @MainActor
+    func cancelConflictResolution(_ resolutionID: UUID) {
+        guard !isBusy, conflictResolutionID == resolutionID else { return }
+        conflictResolutionID = nil
+        mergeConflicts = GomobileMergeConflictsWrapper()
+        mergeConflicts.initDBWrapper(dbWrapper)
+    }
+}
+
+extension MergerController {
+    func nextConflict(resolutionID: UUID? = nil) throws -> MergeConflict {
+        if let resolutionID = resolutionID { try requireConflictResolution(resolutionID) }
         addBreadcrumb("nextConflict")
         do {
             let conflict = try self.mergeConflicts.nextConflict()
@@ -288,7 +373,16 @@ class MergerController: ObservableObject {
                                                 from: conflict.left.data(using: .utf8)!)
             let right = try JSONDecoder().decode(ModelRelatedTuple.self,
                                                  from: conflict.right.data(using: .utf8)!)
-            return MergeConflict(key: conflict.key, left: left, right: right)
+            let presentation: PlaylistConflictPresentation?
+            switch left.model {
+            case .playlistItem, .playlistItemLocationMap, .playlistItemIndependentMediaMap:
+                presentation = try PlaylistConflictPresentation(changedFieldsJSON: conflict.changedFields,
+                                                               model: left.model)
+                _ = try presentation?.rows(for: right.model)
+            default:
+                presentation = nil
+            }
+            return MergeConflict(key: conflict.key, left: left, right: right, playlistPresentation: presentation)
         } catch {
             if error.localizedDescription.starts(with: "There are no unsolved conflicts") {
                 throw MergeError.noConflicts
@@ -296,36 +390,5 @@ class MergerController: ObservableObject {
             SentrySDK.capture(error: error)
             throw error
         }
-    }
-}
-
-func captureError(_ error: Error, userInfo: [String: Any]?) {
-    let nsError = error as NSError
-    let wrappedError = NSError(domain: nsError.domain,
-                               code: nsError.code,
-                               userInfo: userInfo)
-    SentrySDK.capture(error: wrappedError)
-}
-
-func addBreadcrumb(_ message: String) {
-    let crumb = Breadcrumb()
-    crumb.level = SentryLevel.info
-    crumb.category = "merger-controller"
-    crumb.message = message
-    SentrySDK.addBreadcrumb(crumb)
-}
-
-func getTempDir() -> String {
-    do {
-        let temporaryDirectory = try FileManager.default.url(
-            for: .itemReplacementDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true
-        )
-
-        return temporaryDirectory.path
-    } catch {
-        return FileManager.default.temporaryDirectory.path
     }
 }

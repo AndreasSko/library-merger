@@ -1,0 +1,7 @@
+excluded:
+  - .release
+  - Gomobile.xcframework
+  - build
+  - Build
+  - DerivedData
+  - go-source
