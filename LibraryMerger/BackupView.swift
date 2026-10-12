@@ -37,6 +37,7 @@ struct BackupView: View {
                         }, label: {
                             Image(systemName: "square.and.arrow.down")
                         })
+                        .accessibilityIdentifier("select-backup-\(side.rawValue)")
                         .font(.title)
                         .padding()
                         Text("Select Backup")
@@ -160,6 +161,7 @@ struct BackupView: View {
         }
         .fileImporter(isPresented: $isSelectingFile,
                       allowedContentTypes: [.jwlibrary]) { (result) in
+            addBreadcrumb("file-picker.result", data: ["side": side.rawValue])
             guard let requestedSessionID = pickerSessionID,
                   requestedSessionID == mergerController.sessionID else { return }
             Task {
@@ -172,11 +174,16 @@ struct BackupView: View {
                     guard requestedSessionID == mergerController.sessionID else { return }
                     isImporting = false
                     if MergerDiagnostics.isCancellation(error) { return }
+                    captureError(error, operation: "import", stage: "file-picker", side: side)
                     errorMessage = error.localizedDescription
                     showError = true
                 }
                 if requestedSessionID == mergerController.sessionID { isImporting = false }
             }
+        }
+        .onChange(of: isSelectingFile) { presented in
+            addBreadcrumb(presented ? "file-picker.present" : "file-picker.dismiss",
+                          data: ["side": side.rawValue])
         }
     }
 

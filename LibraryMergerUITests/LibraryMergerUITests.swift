@@ -96,14 +96,58 @@ final class LibraryMergerUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [selected], timeout: 5), .completed)
         app.buttons["continue-conflicts"].tap()
         XCTAssertTrue(app.buttons["Export"].waitForExistence(timeout: 15))
-        app.buttons["Export"].tap()
+        assertExportSheet(app)
+        let close = app.buttons["header.closeButton"].firstMatch
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        close.tap()
+        XCTAssertTrue(app.buttons["Export"].waitForExistence(timeout: 5))
+        assertExportSheet(app)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Resolved playlist export"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    private func assertExportSheet(_ app: XCUIApplication) {
+        let export = app.buttons["Export"]
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"), object: export)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed)
+        export.tap()
         XCTAssertTrue(app.otherElements["ActivityListView"].waitForExistence(timeout: 10))
         let caption = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label BEGINSWITH %@", "merged")).firstMatch
         XCTAssertTrue(caption.waitForExistence(timeout: 30), "Share sheet must finish loading the exported backup")
         XCTAssertTrue(caption.label.hasPrefix("merged"), "Share sheet must contain the exported backup")
+        recordScreenshot(app, name: "Export share sheet")
+    }
+
+    func testDocumentPickerCancelAndReopenKeepsEmptyMergeUsable() throws {
+        let app = try launchPlaylistConflict()
+        app.buttons["cancel-conflicts"].tap()
+        let reset = app.buttons["new-merge"]
+        XCTAssertTrue(reset.waitForExistence(timeout: 5))
+        reset.tap()
+        for side in ["leftSide", "leftSide", "rightSide"] {
+            let select = app.buttons["select-backup-" + side]
+            XCTAssertTrue(select.waitForExistence(timeout: 5))
+            select.tap()
+            let cancel = app.buttons["Cancel"].firstMatch
+            let ready = cancel.waitForExistence(timeout: 10)
+            recordScreenshot(app, name: "Document picker " + side)
+            XCTAssertTrue(ready, "Document picker should respond after presentation")
+            cancel.tap()
+            let dismissed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"),
+                                                      object: cancel)
+            XCTAssertEqual(XCTWaiter.wait(for: [dismissed], timeout: 5), .completed)
+            XCTAssertTrue(select.isHittable)
+            XCTAssertFalse(app.buttons["merge-backups"].isEnabled)
+            XCTAssertFalse(app.staticTexts["The following error was returned:"].exists)
+        }
+    }
+
+    private func recordScreenshot(_ app: XCUIApplication, name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Resolved playlist export"
+        attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
     }
