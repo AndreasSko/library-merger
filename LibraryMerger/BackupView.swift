@@ -198,8 +198,8 @@ struct BackupView: View {
         guard sessionID == mergerController.sessionID else { return }
         doneMerging = false
         if let url = sharedUrl {
-            await importBackup(url: url, sessionID: sessionID)
-            if sessionID == mergerController.sessionID { sharedUrl = nil }
+            let imported = await importBackup(url: url, sessionID: sessionID)
+            if sessionID == mergerController.sessionID && imported { sharedUrl = nil }
         } else {
             pickerSessionID = sessionID
             isSelectingFile = true
@@ -207,20 +207,26 @@ struct BackupView: View {
     }
 
     @MainActor
-    func importBackup(url: URL, sessionID: UUID) async {
-        guard sessionID == mergerController.sessionID else { return }
+    @discardableResult
+    func importBackup(url: URL, sessionID: UUID) async -> Bool {
+        guard sessionID == mergerController.sessionID else { return false }
         isImporting = true
         defer { if sessionID == mergerController.sessionID { isImporting = false } }
         do {
             try await mergerController.importBackup(url: url, side: side, sessionID: sessionID)
-            guard sessionID == mergerController.sessionID else { return }
+            guard sessionID == mergerController.sessionID else { return false }
+            guard let stats = mergerController.dbWrapper.stats(side.rawValue) else {
+                throw MergeError.notInitialized(message: "The imported backup could not be read")
+            }
+            dbStats = stats
             fileSelected = true
-            dbStats = mergerController.dbWrapper.stats(side.rawValue)!
+            return true
         } catch {
-            guard sessionID == mergerController.sessionID else { return }
-            if MergerDiagnostics.isCancellation(error) { return }
+            guard sessionID == mergerController.sessionID else { return false }
+            if MergerDiagnostics.isCancellation(error) { return false }
             errorMessage = error.localizedDescription
             showError = true
+            return false
         }
 
     }

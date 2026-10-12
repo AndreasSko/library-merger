@@ -60,8 +60,12 @@ class MergerController: ObservableObject {
     var dbWrapper: GomobileDatabaseWrapper
     var mergeConflicts: GomobileMergeConflictsWrapper
     var settings: MergeSettings
+    private let fileStore: BackupFileStore
+    private let fileLoader: BackupFileLoader
 
-    init() {
+    init(fileStore: BackupFileStore = BackupFileStore(), fileLoader: BackupFileLoader = BackupFileLoader()) {
+        self.fileStore = fileStore
+        self.fileLoader = fileLoader
         addBreadcrumb("MergerController.init")
         self.dbWrapper = GomobileDatabaseWrapper()
         self.dbWrapper.tempDir = getTempDir()
@@ -158,12 +162,11 @@ class MergerController: ObservableObject {
         dbWrapper.skipPlaylists(false)
         let accessGranted = url.startAccessingSecurityScopedResource()
         defer { if accessGranted { url.stopAccessingSecurityScopedResource() } }
-        defer { cleanUpInbox() }
         let started = ProcessInfo.processInfo.systemUptime
         var stage = "file-acquisition"
         var details: [String: Any] = ["access_granted": accessGranted]
         do {
-            let staged = try await BackupFileLoader().load(url)
+            let staged = try await fileLoader.load(url)
             defer { staged.cleanup() }
             details["provider"] = staged.provider.rawValue
             details["acquisition_seconds"] = staged.elapsedSeconds
@@ -171,6 +174,9 @@ class MergerController: ObservableObject {
             addBreadcrumb("import.file-ready", data: details)
             try Task.checkCancellation()
             try dbWrapper.importJWLBackup(staged.url.path, side: side.rawValue)
+            guard dbWrapper.stats(side.rawValue) != nil else {
+                throw MergeError.notInitialized(message: "The imported backup could not be read")
+            }
             addBreadcrumb("import.complete", data: [
                 "side": side.rawValue, "elapsed_seconds": ProcessInfo.processInfo.systemUptime - started
             ])
@@ -191,60 +197,18 @@ class MergerController: ObservableObject {
     private func exportBackupImpl() async throws -> String {
         addBreadcrumb("export.begin")
         do {
-            cleanUpMergedFiles()
             if !self.dbWrapper.dbIsLoaded("mergeSide") {
                 throw MergeError.notInitialized(message: "There is no merged backup yet")
             }
 
-            let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-            let filename = "merged" + String(Int(NSDate().timeIntervalSince1970)) + ".jwlibrary"
-            let path = dir?.appendingPathComponent(filename).path
-
-            try dbWrapper.exportMerged(path)
+            let url = try fileStore.newExportURL()
+            try dbWrapper.exportMerged(url.path)
 
             addBreadcrumb("export.complete")
-            return path!
+            return url.path
         } catch {
             captureError(error, operation: "export", stage: "go-export")
             throw error
-        }
-    }
-
-    // cleanUpMergedFiles removes all files starting with `merged` from the documentDirectory,
-    // as they are the result of older merges
-    func cleanUpMergedFiles() {
-        let fileManager = FileManager.default
-        do {
-            let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-            let files = try fileManager.contentsOfDirectory(at: dir!.absoluteURL,
-                                                   includingPropertiesForKeys: [.isRegularFileKey])
-            for file in files where file.lastPathComponent.hasPrefix("merged") {
-                try fileManager.removeItem(at: file)
-                print("Cleaning up \(file.absoluteString)")
-            }
-        } catch {
-            captureError(error, operation: "cleanup", stage: "exports")
-        }
-    }
-
-    // cleanUpInbox removes all files inside the inbox
-    func cleanUpInbox() {
-        let fileManager = FileManager.default
-        do {
-            let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?
-                .appendingPathComponent("Inbox")
-            let files = try fileManager.contentsOfDirectory(at: dir!.absoluteURL,
-                                                   includingPropertiesForKeys: [.isRegularFileKey])
-            for file in files {
-                try fileManager.removeItem(at: file)
-            }
-        } catch {
-            let nsError = error as NSError
-            if nsError.domain == NSCocoaErrorDomain && nsError.code == 260 {
-                // Ignore error code 260 (file doesn't exist) as it's not an actual problem
-                return
-            }
-            captureError(error, operation: "cleanup", stage: "inbox")
         }
     }
 
