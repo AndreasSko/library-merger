@@ -43,8 +43,12 @@
 		F4BC51242920377B002E0711 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = F4BC51232920377B002E0711 /* Sentry */; };
 		F4BC5126292124ED002E0711 /* SentrySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BC5125292124ED002E0711 /* SentrySettingsView.swift */; };
 		F4AE6A022922000000000002 /* LegalNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AE6A012922000000000001 /* LegalNoticeView.swift */; };
+		C0DE00220000000000000101 /* BackupFileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00220000000000000102 /* BackupFileLoader.swift */; };
 		C0DE00220000000000000201 /* SentryRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00220000000000000202 /* SentryRuntime.swift */; };
+		C0DE00220000000000000301 /* MergerDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00220000000000000302 /* MergerDiagnostics.swift */; };
+		C0DE00220000000000000401 /* BackupFileLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00220000000000000402 /* BackupFileLoaderTests.swift */; };
 		C0DE00220000000000000501 /* SentryRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00220000000000000502 /* SentryRuntimeTests.swift */; };
+		C0DE00220000000000000601 /* MergerDiagnosticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00220000000000000602 /* MergerDiagnosticsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,8 +112,12 @@
 		F4B8AECD258A83C3008DF433 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		F4BC5125292124ED002E0711 /* SentrySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentrySettingsView.swift; sourceTree = "<group>"; };
 		F4AE6A012922000000000001 /* LegalNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalNoticeView.swift; sourceTree = "<group>"; };
+		C0DE00220000000000000102 /* BackupFileLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileLoader.swift; sourceTree = "<group>"; };
 		C0DE00220000000000000202 /* SentryRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryRuntime.swift; sourceTree = "<group>"; };
+		C0DE00220000000000000302 /* MergerDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergerDiagnostics.swift; sourceTree = "<group>"; };
+		C0DE00220000000000000402 /* BackupFileLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileLoaderTests.swift; sourceTree = "<group>"; };
 		C0DE00220000000000000502 /* SentryRuntimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryRuntimeTests.swift; sourceTree = "<group>"; };
+		C0DE00220000000000000602 /* MergerDiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergerDiagnosticsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,7 +194,9 @@
 				F4B6A4502AA2441500DFC7E1 /* BackupIncompatibleView.swift */,
 				F43B4A1D253346DC005BF9E8 /* MergerController.swift */,
 				C0DE00110000000000000002 /* MergerSupport.swift */,
+				C0DE00220000000000000302 /* MergerDiagnostics.swift */,
 				C0DE00220000000000000202 /* SentryRuntime.swift */,
+				C0DE00220000000000000102 /* BackupFileLoader.swift */,
 				F4B8AEAE25867E7B008DF433 /* PublicationController.swift */,
 				F43574BA2533411B00EC55D4 /* Assets.xcassets */,
 				F43574BF2533411B00EC55D4 /* Info.plist */,
@@ -210,7 +220,9 @@
 			children = (
 				F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */,
 				C0DE00120000000000000004 /* PlaylistConflictPresentationTests.swift */,
+				C0DE00220000000000000602 /* MergerDiagnosticsTests.swift */,
 				C0DE00220000000000000502 /* SentryRuntimeTests.swift */,
+				C0DE00220000000000000402 /* BackupFileLoaderTests.swift */,
                 AABBCCDD0000000000000002 /* Fixtures */,
 				F43574CA2533411B00EC55D4 /* Info.plist */,
 			);
@@ -449,7 +461,9 @@
 				F441B1502549AE4900B0409B /* MergeView.swift in Sources */,
 				F43B4A1E253346DD005BF9E8 /* MergerController.swift in Sources */,
 				C0DE00110000000000000001 /* MergerSupport.swift in Sources */,
+				C0DE00220000000000000301 /* MergerDiagnostics.swift in Sources */,
 				C0DE00220000000000000201 /* SentryRuntime.swift in Sources */,
+				C0DE00220000000000000101 /* BackupFileLoader.swift in Sources */,
 				F44BF82B2533602B0057B980 /* FileType.swift in Sources */,
 				F43574B72533411900EC55D4 /* LibraryMergerApp.swift in Sources */,
 				F42649AE257E469100644CA6 /* SettingsView.swift in Sources */,
@@ -472,7 +486,9 @@
 			files = (
 				F43574C92533411B00EC55D4 /* LibraryMergerTests.swift in Sources */,
 				C0DE00120000000000000003 /* PlaylistConflictPresentationTests.swift in Sources */,
+				C0DE00220000000000000601 /* MergerDiagnosticsTests.swift in Sources */,
 				C0DE00220000000000000501 /* SentryRuntimeTests.swift in Sources */,
+				C0DE00220000000000000401 /* BackupFileLoaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,7 +8,6 @@
 
 import Foundation
 import Gomobile
-import Sentry
 
 enum MergeSide: String {
     case leftSide
@@ -145,83 +144,52 @@ class MergerController: ObservableObject {
     @MainActor
     func solveConflict(_ key: String, side: MergeSide, resolutionID: UUID) throws {
         try requireConflictResolution(resolutionID)
-        try mergeConflicts.solveConflict(key, side: side.rawValue)
+        do {
+            try mergeConflicts.solveConflict(key, side: side.rawValue)
+            addBreadcrumb("conflict.resolved", data: ["side": side.rawValue])
+        } catch {
+            captureError(error, operation: "conflict", stage: "resolve", side: side)
+            throw error
+        }
     }
 
     private func importBackupImpl(url: URL, side: MergeSide) async throws {
-        addBreadcrumb("importBackup from \(url.absoluteString) for side \(side.rawValue)")
-        self.dbWrapper.skipPlaylists(false)
-
+        addBreadcrumb("import.begin", data: ["side": side.rawValue])
+        dbWrapper.skipPlaylists(false)
         let accessGranted = url.startAccessingSecurityScopedResource()
-        defer { url.stopAccessingSecurityScopedResource() }
+        defer { if accessGranted { url.stopAccessingSecurityScopedResource() } }
         defer { cleanUpInbox() }
-
+        let started = ProcessInfo.processInfo.systemUptime
+        var stage = "file-acquisition"
+        var details: [String: Any] = ["access_granted": accessGranted]
         do {
-            try downloadFileIfNecessary(url: url)
-        } catch {
-            captureError(error, userInfo: [
-                "url": url.absoluteString,
-                "accessGranted": accessGranted,
-                "fileExists": FileManager.default.fileExists(atPath: url.path),
-                "isReadable": FileManager.default.isReadableFile(atPath: url.path),
-                "bookmarkDataExists": (try? url.bookmarkData()) != nil
+            let staged = try await BackupFileLoader().load(url)
+            defer { staged.cleanup() }
+            details["provider"] = staged.provider.rawValue
+            details["acquisition_seconds"] = staged.elapsedSeconds
+            stage = "go-import"
+            addBreadcrumb("import.file-ready", data: details)
+            try Task.checkCancellation()
+            try dbWrapper.importJWLBackup(staged.url.path, side: side.rawValue)
+            addBreadcrumb("import.complete", data: [
+                "side": side.rawValue, "elapsed_seconds": ProcessInfo.processInfo.systemUptime - started
             ])
-
-            throw error
-        }
-
-        do {
-            try dbWrapper.importJWLBackup(url.path, side: side.rawValue)
         } catch {
-            captureError(error, userInfo: [
-                "url": url.absoluteString,
-                "accessGranted": accessGranted,
-                "fileExists": FileManager.default.fileExists(atPath: url.path),
-                "isReadable": FileManager.default.isReadableFile(atPath: url.path),
-                "bookmarkDataExists": (try? url.bookmarkData()) != nil
-            ])
-
+            if let loadError = error as? BackupFileLoader.LoadError {
+                stage = loadError.stage
+                details["provider"] = loadError.provider.rawValue
+                details["acquisition_seconds"] = loadError.elapsedSeconds
+            }
+            details["elapsed_seconds"] = ProcessInfo.processInfo.systemUptime - started
+            let cancelled = MergerDiagnostics.isCancellation(error)
+            addBreadcrumb(cancelled ? "import.cancelled" : "import.failed", data: ["stage": stage])
+            captureError(error, operation: "import", stage: stage, side: side, details: details)
             throw error
-        }
-    }
-
-    func downloadFileIfNecessary(url: URL) throws {
-        let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: url.path) {
-            return
-        }
-
-        // First, try for iCloud files (ubiquitous items)
-        if fileManager.isUbiquitousItem(at: url) {
-            try fileManager.startDownloadingUbiquitousItem(at: url)
-        } else {
-            // For third-party cloud providers, use NSFileCoordinator
-            var error: NSError?
-            let coordinator = NSFileCoordinator(filePresenter: nil)
-            coordinator.coordinate(readingItemAt: url, options: .withoutChanges, error: &error) { _ in
-            }
-
-            if let error = error {
-                throw error
-            }
-        }
-
-        var wait = 0
-        while true {
-            if wait > 60 {
-                throw GeneralError.timeout(message: "Failed to download \(url.lastPathComponent). "
-                    + "Timeout after \(wait) seconds. Please try again.")
-            }
-            if fileManager.fileExists(atPath: url.path) {
-                return
-            }
-            sleep(1)
-            wait += 1
         }
     }
 
     private func exportBackupImpl() async throws -> String {
-        addBreadcrumb("exportBackup")
+        addBreadcrumb("export.begin")
         do {
             cleanUpMergedFiles()
             if !self.dbWrapper.dbIsLoaded("mergeSide") {
@@ -234,9 +202,10 @@ class MergerController: ObservableObject {
 
             try dbWrapper.exportMerged(path)
 
+            addBreadcrumb("export.complete")
             return path!
         } catch {
-            SentrySDK.capture(error: error)
+            captureError(error, operation: "export", stage: "go-export")
             throw error
         }
     }
@@ -254,8 +223,7 @@ class MergerController: ObservableObject {
                 print("Cleaning up \(file.absoluteString)")
             }
         } catch {
-            SentrySDK.capture(error: error)
-            print("Error while trying to clean up old files")
+            captureError(error, operation: "cleanup", stage: "exports")
         }
     }
 
@@ -276,7 +244,7 @@ class MergerController: ObservableObject {
                 // Ignore error code 260 (file doesn't exist) as it's not an actual problem
                 return
             }
-            SentrySDK.capture(error: error)
+            captureError(error, operation: "cleanup", stage: "inbox")
         }
     }
 
@@ -293,42 +261,55 @@ class MergerController: ObservableObject {
 
         dbWrapper.init_()
 
+        var stage = "locations"
         do {
-            await progress.update(status: "Merging Locations", percent: 14)
+            await reportMergeStage(progress, status: "Merging Locations", percent: 14)
             try dbWrapper.mergeLocations()
 
-            await progress.update(status: "Merging Bookmarks", percent: 28)
+            stage = "bookmarks"
+            await reportMergeStage(progress, status: "Merging Bookmarks", percent: 28)
             try dbWrapper.mergeBookmarks(self.settings.bookmarkResolver.rawValue, mcw: self.mergeConflicts)
 
-            await progress.update(status: "Merging InputFields", percent: 42)
+            stage = "input-fields"
+            await reportMergeStage(progress, status: "Merging InputFields", percent: 42)
             try dbWrapper.mergeInputFields(self.settings.inputFieldResolver.rawValue, mcw: self.mergeConflicts)
 
-            await progress.update(status: "Merging Tags", percent: 56)
+            stage = "tags"
+            await reportMergeStage(progress, status: "Merging Tags", percent: 56)
             try dbWrapper.mergeTags()
 
-            await progress.update(status: "Merging Markings", percent: 70)
+            stage = "markings"
+            await reportMergeStage(progress, status: "Merging Markings", percent: 70)
             try dbWrapper.mergeUserMarkAndBlockRange(self.settings.markingResolver.rawValue, mcw: self.mergeConflicts)
 
-            await progress.update(status: "Merging Notes", percent: 84)
+            stage = "notes"
+            await reportMergeStage(progress, status: "Merging Notes", percent: 84)
             try dbWrapper.mergeNotes(self.settings.noteResolver.rawValue, mcw: self.mergeConflicts)
 
-            await progress.update(status: NSLocalizedString("Merging Playlists", comment: "Merge progress"),
+            stage = "playlists"
+            await reportMergeStage(progress, status: NSLocalizedString("Merging Playlists", comment: "Merge progress"),
                                   percent: 91)
             try dbWrapper.mergePlaylists("", mcw: self.mergeConflicts)
 
-            await progress.update(status: "Merging TagMaps", percent: 98)
+            stage = "tag-maps"
+            await reportMergeStage(progress, status: "Merging TagMaps", percent: 98)
             try dbWrapper.mergeTagMaps()
 
-            await progress.update(status: "Done", percent: 100)
+            await reportMergeStage(progress, status: "Done", percent: 100)
+            addBreadcrumb("merge.complete")
         } catch {
             if error.localizedDescription.starts(with: "There were conflicts while trying to merge") {
                 throw MergeError.mergeConflict
             }
-            SentrySDK.capture(error: error)
+            captureError(error, operation: "merge", stage: stage)
             throw MergeError.error(message: error.localizedDescription)
         }
     }
 
+    private func reportMergeStage(_ progress: MergeProgress, status: String, percent: Float) async {
+        addBreadcrumb("merge.stage", data: ["status": status])
+        await progress.update(status: status, percent: percent)
+    }
 }
 
 extension MergerController {
@@ -387,7 +368,7 @@ extension MergerController {
             if error.localizedDescription.starts(with: "There are no unsolved conflicts") {
                 throw MergeError.noConflicts
             }
-            SentrySDK.capture(error: error)
+            captureError(error, operation: "conflict", stage: "decode-next")
             throw error
         }
     }

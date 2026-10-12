@@ -1,21 +1,4 @@
 import Foundation
-import Sentry
-
-func captureError(_ error: Error, userInfo: [String: Any]?) {
-    let nsError = error as NSError
-    let wrappedError = NSError(domain: nsError.domain,
-                               code: nsError.code,
-                               userInfo: userInfo)
-    SentrySDK.capture(error: wrappedError)
-}
-
-func addBreadcrumb(_ message: String) {
-    let crumb = Breadcrumb()
-    crumb.level = SentryLevel.info
-    crumb.category = "merger-controller"
-    crumb.message = message
-    SentrySDK.addBreadcrumb(crumb)
-}
 
 func getTempDir() -> String {
     do {

@@ -171,6 +171,7 @@ struct BackupView: View {
                 } catch {
                     guard requestedSessionID == mergerController.sessionID else { return }
                     isImporting = false
+                    if MergerDiagnostics.isCancellation(error) { return }
                     errorMessage = error.localizedDescription
                     showError = true
                 }
@@ -210,6 +211,7 @@ struct BackupView: View {
             dbStats = mergerController.dbWrapper.stats(side.rawValue)!
         } catch {
             guard sessionID == mergerController.sessionID else { return }
+            if MergerDiagnostics.isCancellation(error) { return }
             errorMessage = error.localizedDescription
             showError = true
         }

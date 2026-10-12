@@ -158,6 +158,8 @@ struct CatalogDBSettingsView: View {
                     catalogNeedsUpdate = GomobileCatalogNeedsUpdate(catalogDBPath?.path)
                 } else if !(manager.getProgress()?.canceled ?? false) {
                     downloadError = manager.error()
+                    captureError(GeneralError.general(message: downloadError),
+                                 operation: "catalog", stage: "download")
                 }
             }
         }
