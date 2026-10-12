@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Gomobile
-import Sentry
 
 @main
 struct LibraryMergerApp: App {
@@ -43,21 +42,5 @@ struct LibraryMergerApp_Previews: PreviewProvider {
     static var previews: some View {
         let mergerController = MergerController()
         ContentView(mergerController: mergerController)
-    }
-}
-
-func setupSentry(enableSentry: Bool) {
-    SentrySDK.start { options in
-        options.enabled = enableSentry
-        options.dsn = "https://e46082df0a5343d0bfe1615b169834ff@o1083063.ingest.sentry.io/4504147949780992"
-        options.enableAutoSessionTracking = false
-        options.enableNetworkTracking = false
-
-        #if DEBUG
-        options.beforeSend = { event in
-            print("Sending: \(event)")
-            return event
-        }
-        #endif
     }
 }
