@@ -11,8 +11,7 @@ struct ExportView: View {
     @ObservedObject var mergerController: MergerController
 
     @State private var isExporting: Bool = false
-    @State private var isSharing: Bool = false
-    @State private var exportedURL: URL!
+    @State private var shareItem: BackupShareItem?
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
 
@@ -27,8 +26,7 @@ struct ExportView: View {
                         let path = try await mergerController.exportBackup(sessionID: requestedSessionID)
                         guard requestedSessionID == mergerController.sessionID else { return }
                         isExporting = false
-                        exportedURL = NSURL.fileURL(withPath: path)
-                        isSharing = true
+                        shareItem = BackupShareItem(url: URL(fileURLWithPath: path))
                     } catch {
                         guard requestedSessionID == mergerController.sessionID else { return }
                         isExporting = false
@@ -49,21 +47,21 @@ struct ExportView: View {
                 ErrorView(error: $errorMessage)
             }
         }
-        .sheet(isPresented: $isSharing, onDismiss: {
+        .sheet(item: $shareItem, onDismiss: {
             addBreadcrumb("share-sheet.dismiss")
-        }, content: {
-            ShareView(url: self.$exportedURL)
+        }, content: { item in
+            ShareView(url: item.url)
         })
     }
 }
 
 struct ShareView: UIViewControllerRepresentable {
-    @Binding var url: URL!
+    let url: URL
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ShareView>) -> UIActivityViewController {
         addBreadcrumb("share-sheet.create")
         let started = ProcessInfo.processInfo.systemUptime
-        let controller = UIActivityViewController(activityItems: [url!],
+        let controller = UIActivityViewController(activityItems: [url],
                                         applicationActivities: nil)
         controller.completionWithItemsHandler = { _, completed, _, error in
             let details: [String: Any] = [
