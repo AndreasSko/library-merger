@@ -10,6 +10,7 @@ import Gomobile
 
 struct MergeConflictOverview: View {
     var mrt: ModelRelatedTuple?
+    var thumbnail: UIImage?
 
     var body: some View {
         VStack {
@@ -27,7 +28,7 @@ struct MergeConflictOverview: View {
                 InputFieldOverview(inputField: inputField, related: related, publication: publication)
             case .playlistItem(let item):
                 PlaylistOverview(itemLabel: item.label, related: related, publication: publication,
-                                 sourceURL: mrt?.sourceURL)
+                                 sourceURL: mrt?.sourceURL, thumbnail: thumbnail)
             case .playlistItemLocationMap, .playlistItemIndependentMediaMap:
                 PlaylistOverview(itemLabel: related?.playlistItem?.label, related: related, publication: publication,
                                  sourceURL: mrt?.sourceURL)

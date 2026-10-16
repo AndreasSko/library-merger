@@ -8,6 +8,7 @@
 
 import Foundation
 import Gomobile
+import UIKit
 import Sentry
 
 enum MergeSide: String {
@@ -26,6 +27,7 @@ struct MergeConflict {
     let left: ModelRelatedTuple?
     let right: ModelRelatedTuple?
     var changedFields: [PlaylistChangedField] = []
+    var thumbnail: UIImage?
 }
 
 enum ConflictSolver: String {
@@ -297,7 +299,8 @@ class MergerController: ObservableObject {
                                                  from: conflict.right.data(using: .utf8)!)
             let changedFields = try JSONDecoder().decode([PlaylistChangedField].self,
                                                          from: Data(conflict.changedFields.utf8))
-            return MergeConflict(key: conflict.key, left: left, right: right, changedFields: changedFields)
+            return MergeConflict(key: conflict.key, left: left, right: right, changedFields: changedFields,
+                                 thumbnail: playlistThumbnail(left.model))
         } catch {
             if error.localizedDescription.starts(with: "There are no unsolved conflicts") {
                 throw MergeError.noConflicts
@@ -305,6 +308,17 @@ class MergerController: ObservableObject {
             SentrySDK.capture(error: error)
             throw error
         }
+    }
+
+    // Only item conflicts refer to the item IDs of the imported backup, which
+    // the thumbnail lookup needs. Items without a thumbnail show none.
+    private func playlistThumbnail(_ model: Model) -> UIImage? {
+        guard case .playlistItem(let item) = model, item.thumbnailFilePath.valid,
+              let data = try? dbWrapper.playlistThumbnail(MergeSide.leftSide.rawValue,
+                                                          playlistItemID: item.playlistItemId) else {
+            return nil
+        }
+        return UIImage(data: data)
     }
 }
 

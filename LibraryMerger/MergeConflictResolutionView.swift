@@ -65,7 +65,7 @@ struct MergeConflictResolutionView: View {
                     }
                     .padding()
 
-                    MergeConflictOverview(mrt: conflict.left)
+                    MergeConflictOverview(mrt: conflict.left, thumbnail: conflict.thumbnail)
                         .padding(.top)
 
                     VStack {

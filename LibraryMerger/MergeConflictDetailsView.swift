@@ -214,6 +214,7 @@ struct PlaylistOverview: View {
     var related: Related?
     var publication: Publication?
     var sourceURL: String?
+    var thumbnail: UIImage?
 
     private var title: String? {
         if let title = related?.location?.title, title.valid, !title.string.isEmpty {
@@ -224,6 +225,19 @@ struct PlaylistOverview: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            if let thumbnail = thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 192, height: 108)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.primary.opacity(0.1), lineWidth: 1))
+                    .shadow(color: Color.black.opacity(0.12), radius: 8, y: 3)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 12)
+                    .accessibilityHidden(true)
+            }
             if let title = title {
                 KeyValue(key: "Title:", value: title)
             }

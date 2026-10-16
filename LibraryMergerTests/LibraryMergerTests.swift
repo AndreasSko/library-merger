@@ -77,6 +77,19 @@ class LibraryMergerTests: XCTestCase {
                        600.formatted(.number.precision(.fractionLength(0...7))) + " s")
     }
 
+    func testPlaylistConflictShowsThumbnail() async throws {
+        let controller = MergerController()
+        try await controller.importBackup(url: fixture("publication-base"), side: .leftSide)
+        try await controller.importBackup(url: fixture("publication-action"), side: .rightSide)
+
+        do {
+            try await controller.merge(progress: MergeProgress())
+            XCTFail("Expected a playlist conflict")
+        } catch MergeError.mergeConflict { }
+
+        XCTAssertNotNil(try controller.nextConflict().thumbnail)
+    }
+
     func testUnsupportedPlaylistsAreSkipped() async throws {
         let controller = MergerController()
         try await controller.importBackup(url: fixture("base"), side: .leftSide)
