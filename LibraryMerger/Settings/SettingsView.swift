@@ -39,7 +39,7 @@ struct SettingsView: View {
                     })
 
                     Toggle(isOn: $warnOnPlaylist) {
-                        Text("Warn if backup contains playlist")
+                        Text("Warn if playlists are skipped")
                     }
 
                     #if DEBUG

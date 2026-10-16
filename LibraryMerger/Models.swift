@@ -11,6 +11,8 @@ struct Related: Decodable {
     let blockRange: [BlockRange]?
     let bookmark: Bookmark?
     let inputField: InputField?
+    let independentMedia: IndependentMedia?
+    let playlistItem: PlaylistItem?
     let location: Location?
     let publicationLocation: Location?
     let note: Note?
@@ -24,6 +26,7 @@ enum Model: Decodable {
     enum CodingKeys: String, CodingKey {
         case modelType = "type"
     }
+    // swiftlint:disable:next cyclomatic_complexity
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let modelType = try container.decode(String.self, forKey: .modelType)
@@ -55,11 +58,21 @@ enum Model: Decodable {
         case "UserMarkBlockRange":
             let mdl = try UserMarkBlockRange(from: decoder)
             self = .userMarkBlockRange(mdl)
+        case "PlaylistItem":
+            self = .playlistItem(try PlaylistItem(from: decoder))
+        case "PlaylistItemLocationMap":
+            self = .playlistItemLocationMap(try PlaylistItemLocationMap(from: decoder))
+        case "PlaylistItemIndependentMediaMap":
+            self = .playlistItemIndependentMediaMap(try PlaylistItemIndependentMediaMap(from: decoder))
         default:
-            fatalError()
+            throw DecodingError.dataCorruptedError(forKey: .modelType, in: container,
+                                                  debugDescription: "Unsupported conflict type: \(modelType)")
         }
     }
 
+    case playlistItem(PlaylistItem)
+    case playlistItemLocationMap(PlaylistItemLocationMap)
+    case playlistItemIndependentMediaMap(PlaylistItemIndependentMediaMap)
     case blockRange(BlockRange)
     case bookmark(Bookmark)
     case inputField(InputField)
@@ -126,7 +139,6 @@ struct Tag: Decodable {
     let tagId: Int
     let tagType: Int
     let name: String
-    let imageFilename: NullString
 }
 
 struct TagMap: Decodable {
@@ -180,4 +192,35 @@ struct NullString: Decodable {
 
     let string: String
     let valid: Bool
+}
+
+struct PlaylistItem: Decodable {
+    let playlistItemId: Int
+    let label: String
+    let startTrimOffsetTicks: NullInt64
+    let endTrimOffsetTicks: NullInt64
+    let accuracy: Int
+    let endAction: Int
+    let thumbnailFilePath: NullString
+}
+
+struct IndependentMedia: Decodable {
+    let independentMediaId: Int
+    let originalFilename: String
+    let filePath: String
+    let mimeType: String
+    let hash: String
+}
+
+struct PlaylistItemLocationMap: Decodable {
+    let playlistItemId: Int
+    let locationId: Int
+    let majorMultimediaType: Int
+    let baseDurationTicks: NullInt64
+}
+
+struct PlaylistItemIndependentMediaMap: Decodable {
+    let playlistItemId: Int
+    let independentMediaId: Int
+    let durationTicks: Int64
 }

@@ -15,7 +15,7 @@ struct MergeView: View {
     @Binding var doneMerging: Bool
 
     @State private var isMerging: Bool = false
-    @ObservedObject private var mergeProgress: MergeProgress = MergeProgress()
+    @StateObject private var mergeProgress = MergeProgress()
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
     @State private var showMergeConflictSheet: Bool = false
@@ -28,18 +28,17 @@ struct MergeView: View {
                     Task {
                         doneMerging = false
                         cancelMerge = false
-                        isMerging = true
                         mergeProgress.percent = 1
                         mergeProgress.status = "Merging.."
 
                         doneMerging = await merge()
-                        isMerging = false
                     }
 
                 }, label: {
                     Text("Merge")
                 })
-                .disabled(!enabled)
+                .disabled(!enabled || isMerging)
+                .accessibilityIdentifier("merge-backups")
             }
             .font(.title2)
             .padding()
@@ -50,7 +49,6 @@ struct MergeView: View {
                 Task {
                     if cancelMerge {
                         doneMerging = false
-                        isMerging = false
                         mergeProgress.percent = 0
                     } else {
                         doneMerging = await merge(reset: false)
@@ -76,6 +74,8 @@ struct MergeView: View {
     }
 
     func merge(reset: Bool = true) async -> Bool {
+        isMerging = true
+        defer { isMerging = false }
         do {
             try await mergerController.merge(reset: reset, progress: mergeProgress)
         } catch MergeError.mergeConflict {

@@ -37,15 +37,15 @@ The easiest is to open an issue on GitHub or write me an email: library.merger@a
 "help.conflictAutoresolution.text" = "When you are merging your backups, it might happen that two entries collide. Instead of asking you how to continue, you can decide to always choose one side instead of the other one. For Notes it's also possible to always choose the newer one. This might come in handy, if you are SURE that one side is always the one to include.\n\nThe safest path - especially when merging for the first time - is to leave it at `manual` and decide for each case, which entry should be included into the final backup.";
 
 "help.conflict.bookmarks.title" = "Bookmark conflict";
-"help.conflict.bookmarks.text" = "Bookmarks are set for each publication (i.e. a Watchtower issue or a Bible translation) and can be placed at ten different „slots“ (the colors you see in the app). A collision happens, if two bookmarks are placed at the same slot for the same publication. Choose the bookmark that should be included in the merged backup. The upper one belongs to the right backup, the lower one to the left.\n\n
+"help.conflict.bookmarks.text" = "Bookmarks are set for each publication (i.e. a Watchtower issue or a Bible translation) and can be placed at ten different „slots“ (the colors you see in the app). A collision happens, if two bookmarks are placed at the same slot for the same publication. Choose the bookmark that should be included in the merged backup. The upper one belongs to the left backup, the lower one to the right.\n\n
 To figure out, to which publication this Bookmark belongs to, look at the additional information: „BookNumber“ and „ChapterNumber“ generally relate to a Bible book, while „DocumentID“ might be a Watchtower issue or a different publication.";
 
 "help.conflict.markings.title" = "Marking conflict";
-"help.conflict.markings.text" = "Markings conflict if they overlap at at least one point. A marking is defined by a Identifier, a StartToken and EndToken. You can think of identifier as paragraphs in a extended way: In bible books thery generally correlate to the verses, however in other publications, questions and captions are also counted towards identifiers. Start- and Endtoken represent the beginning and the end of a marking, where words and punctuation marks are counted as tokens (e.g. the sentence “You are my witnesses,” contains five tokens, as four words and one comma are counted). Note that a marking can span multiple Paragraphs. Choose the marking that should be included in the merged backup. The upper one belongs to the right backup, the lower one to the left.\n\n
+"help.conflict.markings.text" = "Markings conflict if they overlap at at least one point. A marking is defined by a Identifier, a StartToken and EndToken. You can think of identifier as paragraphs in a extended way: In bible books thery generally correlate to the verses, however in other publications, questions and captions are also counted towards identifiers. Start- and Endtoken represent the beginning and the end of a marking, where words and punctuation marks are counted as tokens (e.g. the sentence “You are my witnesses,” contains five tokens, as four words and one comma are counted). Note that a marking can span multiple Paragraphs. Choose the marking that should be included in the merged backup. The upper one belongs to the left backup, the lower one to the right.\n\n
 To figure out where the marking is located, look at the additional information: „BookNumber“ and „ChapterNumber“ generally relate to a Bible book, while „DocumentID“ might be a Watchtower issue or a different publication.";
 
 "help.conflict.notes.title" = "Note conflict";
-"help.conflict.notes.text" = "A note collides if it exists on both sides (so it must have been synced at least once) and it differers in the title or content. It generally makes sense to choose the note with the newest date. The upper one belongs to the right backup, the lower one to the left.";
+"help.conflict.notes.text" = "A note collides if it exists on both sides (so it must have been synced at least once) and it differers in the title or content. It generally makes sense to choose the note with the newest date. The upper one belongs to the left backup, the lower one to the right.";
 
 "help.conflict.input fields.title" = "Input field conflict";
 "help.conflict.input fields.text" = "Input fields are used in interactive publications where you can enter custom notes, tick boxes, etc. An example would be the 'Enjoy Life Forever!' brochure.";
@@ -65,9 +65,9 @@ Thank you so much for your help! 😊";
 "errorView.sentryHint" = "You can also decide to automatically send error reports:";
 
 // PlaylistWarningView
-"playlistWarningView.explanation" = "The backup contains playlists that the Library Merger is not able to process yet.
-Please note that playlists won't be included in the merged backup. If you want to keep them, export your playlists via the Share feature in JW Library first and import them again after you restored the merged backup.
-Merging playlists is a feature that I'm currently working on and will be included in a later version of Library Merger. Thank you for your patience 😊";
+"playlistWarningView.explanation" = "The backup contains playlists that use features Library Merger can't merge yet, like markers.
+Please note that the playlists of this backup won't be included in the merged backup. If you want to keep them, export your playlists via the Share feature in JW Library first and import them again after you restored the merged backup.
+If you see this, I'd really appreciate it if you could send me the backup at library.merger@andreas-sk.de, so I can add support for it. Thank you so much for your help! 😊";
 
 // BackupIncompatibleView
 "backupIncompatibleView.tooNew" = "The version of the backup you are trying to import is not yet supported with Library Merger.
@@ -79,3 +79,7 @@ Make sure to export the backup using the latest version of JW Library.";
 // Legal Notice
 "Legal Notice" = "Legal Notice";
 "legalNotice.body" = "This application is not owned or operated by Watch Tower Bible and Tract Society of Pennsylvania, however it is distributed with permission under a license from Watch Tower. All ownership rights to the content within the JW Library® application remain exclusively with Watch Tower Bible and Tract Society of Pennsylvania.\n\nJW Library® is a registered trademark owned exclusively by Watch Tower Bible and Tract Society of Pennsylvania (\"Watch Tower\").";
+
+// Playlist conflicts
+"help.conflict.playlist items.title" = "Playlist item conflict";
+"help.conflict.playlist items.text" = "The same playlist item has different settings in the two backups. Only the settings that differ are shown. Choose the version from the left or the right backup. All settings shown in that version will be kept. Times are shown in seconds.";

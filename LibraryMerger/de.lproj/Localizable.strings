@@ -98,6 +98,7 @@ Am einfachsten ist es, ein Issue auf GitHub zu erstellen oder mir eine Email zu 
 "Markings" = "Markierungen";
 "Notes" = "Notizen";
 "Input fields" = "Eingabefelder";
+"Playlists" = "Playlists";
 
 "help.conflict.bookmarks.title" = "Lesezeichen-Konflikt";
 "help.conflict.bookmarks.text" = "Lesezeichen gelten pro Publikation (z.B. eine Wachtturm-Ausgabe oder Bibelübersetzung) und können an zehn verschiedenen Stellen - den sogenannten „Slots“ - platziert werden. Eine Kollision entsteht dann, wenn zwei Lesezeichen in der selben Publikation auf der gleichen Position liegen. Wähle das Lesezeichen aus, das im gemergten Backup enthalten sein soll. Das obere gehört zum linken Backup, das untere zum rechten.\n\n
@@ -158,11 +159,11 @@ Vielen Dank für deine Hilfe! 😊";
 
 // PlaylistWarningView
 "Can't merge playlists" = "Playlists können nicht gemergt werden";
-"playlistWarningView.explanation" = "Dein Backup enthält Playlists, die der Library Merger aktuell noch nicht verarbeiten kann.
-Bitte beachte, dass das gemergte Backup diese Playlists nicht enthalten wird. Um sie zu behalten, nutze die Teilen-Funktion in der JW Library, um die Playlists zu exportieren. Nachdem du das gemergte Backup wiederhergestellt hast, kannst du die Playlists dann wieder importieren.
-Ich arbeite aktuell daran, dass auch Playlists bald gemergt werden können. Das Feature sollte in einer der nächsten Versionen verfügbar sein. Vielen Dank für deine Geduld 😊";
-"Warn if backup contains playlist" = "Warne, wenn Backup Playlists enthält";
-"Contains playlists" = "Enthält Playlists";
+"playlistWarningView.explanation" = "Dein Backup enthält Playlists mit Funktionen, die der Library Merger noch nicht mergen kann, zum Beispiel Marker.
+Bitte beachte, dass das gemergte Backup die Playlists dieses Backups nicht enthalten wird. Um sie zu behalten, nutze die Teilen-Funktion in der JW Library, um die Playlists zu exportieren. Nachdem du das gemergte Backup wiederhergestellt hast, kannst du die Playlists dann wieder importieren.
+Wenn du diese Meldung siehst, würde ich mich sehr freuen, wenn du mir das Backup an library.merger@andreas-sk.de schickst, damit ich die Unterstützung dafür ergänzen kann. Vielen Dank für deine Hilfe! 😊";
+"Warn if playlists are skipped" = "Warne, wenn Playlists ausgelassen werden";
+"Playlists skipped" = "Playlists ausgelassen";
 
 // BackupIncompatibleView
 "Backup not compatible" = "Backup inkompatibel";
@@ -175,3 +176,37 @@ Stelle sicher, dass du für den Export des Backups die neueste Version von JW Li
 // Legal Notice
 "Legal Notice" = "Rechtlicher Hinweis";
 "legalNotice.body" = "Diese Anwendung ist nicht Eigentum der Watch Tower Bible and Tract Society of Pennsylvania und wird auch nicht von ihr betrieben, sondern mit Genehmigung unter einer Lizenz von Watch Tower vertrieben. Alle Eigentumsrechte an den Inhalten der JW Library®-Anwendung verbleiben ausschließlich bei der Watch Tower Bible and Tract Society of Pennsylvania. \n\nJW Library® ist eine eingetragene Marke, die ausschließlich der Watch Tower Bible and Tract Society of Pennsylvania („Watch Tower“) gehört.";
+
+// Playlist conflicts
+"Playlists:" = "Playlists:";
+"playlist items" = "Playlist-Einträgen";
+"help.conflict.playlist items.title" = "Konflikt bei Playlist-Einträgen";
+"help.conflict.playlist items.text" = "Derselbe Playlist-Eintrag hat in den beiden Backups unterschiedliche Einstellungen. Nur die Einstellungen, die sich unterscheiden, werden angezeigt. Wähle die Version aus dem linken oder dem rechten Backup. Alle angezeigten Einstellungen dieser Version werden übernommen. Zeiten werden in Sekunden angezeigt.";
+"Left backup" = "Linkes Backup";
+"Right backup" = "Rechtes Backup";
+"Playlist:" = "Playlist:";
+"Media:" = "Medien:";
+"Name:" = "Name:";
+"Start trim:" = "Kürzung am Anfang:";
+"End trim:" = "Kürzung am Ende:";
+"Accuracy:" = "Genauigkeit:";
+"End action:" = "Aktion am Ende:";
+"Duration:" = "Dauer:";
+"Media type:" = "Medientyp:";
+"Not set" = "Nicht festgelegt";
+"Play next" = "Weiter";
+"Stop" = "Stop";
+"Freeze frame" = "Standbild";
+"Repeat" = "Wiederholen";
+"Audio" = "Audio";
+"Video" = "Video";
+"What should this item be called?" = "Wie soll dieser Eintrag heißen?";
+"Where should playback start?" = "Wo soll die Wiedergabe beginnen?";
+"Where should playback stop?" = "Wo soll die Wiedergabe enden?";
+"Which timing accuracy should be used?" = "Welche Zeitgenauigkeit soll verwendet werden?";
+"What should happen when this item finishes?" = "Was soll am Ende dieses Eintrags passieren?";
+"How long should this item play?" = "Wie lange soll dieser Eintrag abgespielt werden?";
+"Which media type should be used?" = "Welcher Medientyp soll verwendet werden?";
+"Which settings should this item use?" = "Welche Einstellungen soll dieser Eintrag verwenden?";
+"Choose one version. All settings shown in that version will be kept." = "Wähle eine Version. Alle darin angezeigten Einstellungen werden übernommen.";
+"Open on jw.org" = "Auf jw.org öffnen";
