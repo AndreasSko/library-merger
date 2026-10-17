@@ -2,15 +2,17 @@ name: Build
 
 on:
   push:
+    branches: [master]
+  pull_request:
 
 jobs:
   Build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: sersoft-gmbh/xcodebuild-action@v2
         with:
           project: LibraryMerger.xcodeproj
           scheme: LibraryMerger
           destination: platform=iOS Simulator,name=iPhone 17 Pro
-          action: build
+          action: test

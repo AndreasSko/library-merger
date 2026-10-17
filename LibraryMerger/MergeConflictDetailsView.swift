@@ -16,6 +16,9 @@ struct MergeConflictDetailsView: View {
         VStack(alignment: .leading) {
             if let conflict = conflict,
                let sideData = side == .leftSide ? conflict.left : conflict.right {
+                Text(side == .leftSide ? "Left backup" : "Right backup")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 switch sideData.model {
                 case .bookmark(let bookmark):
                     BookmarkDetail(bookmark: bookmark)
@@ -25,6 +28,8 @@ struct MergeConflictDetailsView: View {
                     NoteDetail(note: note)
                 case .inputField(let inputfield):
                     InputFieldDetail(inputField: inputfield)
+                case .playlistItem, .playlistItemLocationMap, .playlistItemIndependentMediaMap:
+                    PlaylistDetail(changedFields: conflict.changedFields, model: sideData.model)
                 default:
                     Text("Error! Can not generate preview")
                         .foregroundColor(.red)
@@ -34,7 +39,7 @@ struct MergeConflictDetailsView: View {
                     .foregroundColor(.red)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color.white)
         .cornerRadius(10)
@@ -202,4 +207,73 @@ struct CustomAlignment: AlignmentID {
 }
 extension HorizontalAlignment {
     static let custom: HorizontalAlignment = HorizontalAlignment(CustomAlignment.self)
+}
+
+struct PlaylistOverview: View {
+    var itemLabel: String?
+    var related: Related?
+    var publication: Publication?
+    var sourceURL: String?
+    var thumbnail: UIImage?
+
+    private var title: String? {
+        if let title = related?.location?.title, title.valid, !title.string.isEmpty {
+            return title.string
+        }
+        return itemLabel
+    }
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            if let thumbnail = thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 192, height: 108)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.primary.opacity(0.1), lineWidth: 1))
+                    .shadow(color: Color.black.opacity(0.12), radius: 8, y: 3)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 12)
+                    .accessibilityHidden(true)
+            }
+            if let title = title {
+                KeyValue(key: "Title:", value: title)
+            }
+            if let publication = publication {
+                KeyValue(key: "Publication:", value: publication.title)
+                if !publication.issueTitle.isEmpty {
+                    KeyValue(key: "Issue:", value: publication.issueTitle)
+                }
+            }
+            if let media = related?.independentMedia, media.originalFilename != title {
+                KeyValue(key: "Media:", value: media.originalFilename)
+            }
+            if let tag = related?.tag {
+                KeyValue(key: "Playlist:", value: tag.name)
+            }
+            if let sourceURL = sourceURL, let url = URL(string: sourceURL) {
+                Link("Open on jw.org", destination: url)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+struct PlaylistDetail: View {
+    var changedFields: [PlaylistChangedField]
+    var model: Model
+
+    var body: some View {
+        // Fall back to all settings of the item if Go reported none as changed.
+        let fields = changedFields.isEmpty ? PlaylistChangedField.allCases : changedFields
+        VStack(alignment: .leading) {
+            ForEach(fields) { field in
+                if let value = field.value(in: model) {
+                    KeyValue(key: field.title, value: value)
+                }
+            }
+        }
+    }
 }

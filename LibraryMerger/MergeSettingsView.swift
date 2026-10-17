@@ -10,10 +10,6 @@ import SwiftUI
 struct MergeSettingsView: View {
     @ObservedObject var mergerController: MergerController
 
-    @State private var bookmarkSolverIcon = "minus.circle"
-    @State private var markingSolverIcon = "minus.circle"
-    @State private var noteSolverIcon = "minus.circle"
-    @State private var inputFieldSolverIcon = "minus.circle"
     @State private var helpOpened = false
 
     var body: some View {
@@ -44,167 +40,14 @@ struct MergeSettingsView: View {
                 .background(Color(.sRGB, red: 150/255, green: 150/255, blue: 150/255, opacity: 0.1))
 
             HStack {
-                VStack {
-                    Menu {
-                        Button(action: {
-                            mergerController.settings.bookmarkResolver = ConflictSolver.disabled
-                            bookmarkSolverIcon = confSolverToIcon(solver: mergerController.settings.bookmarkResolver)
-                        }, label: {
-                            Text("Manual")
-                            Image(systemName: "minus.circle")
-                        })
-                        Button(action: {
-                            mergerController.settings.bookmarkResolver = ConflictSolver.chooseLeft
-                            bookmarkSolverIcon = confSolverToIcon(solver: mergerController.settings.bookmarkResolver)
-                        }, label: {
-                            Text("Left")
-                            Image(systemName: "arrow.left")
-                        })
-                        Button(action: {
-                            mergerController.settings.bookmarkResolver = ConflictSolver.chooseRight
-                            bookmarkSolverIcon = confSolverToIcon(solver: mergerController.settings.bookmarkResolver)
-                        }, label: {
-                            Text("Right")
-                            Image(systemName: "arrow.right")
-                        })
-                    } label: {
-                        Spacer()
-                        Spacer()
-                        VStack {
-                            Image(systemName: "bookmark")
-                            Image(systemName: bookmarkSolverIcon)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                                .padding(.top, 0.3)
-                        }
-                        .frame(height: 60)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-                Spacer()
-                VStack {
-                    Menu {
-                        Button(action: {
-                            mergerController.settings.markingResolver = ConflictSolver.disabled
-                            markingSolverIcon = confSolverToIcon(solver: mergerController.settings.markingResolver)
-                        }, label: {
-                            Text("Manual")
-                            Image(systemName: "minus.circle")
-                        })
-                        Button(action: {
-                            mergerController.settings.markingResolver = ConflictSolver.chooseLeft
-                            markingSolverIcon = confSolverToIcon(solver: mergerController.settings.markingResolver)
-                        }, label: {
-                            Text("Left")
-                            Image(systemName: "arrow.left")
-                        })
-                        Button(action: {
-                            mergerController.settings.markingResolver = ConflictSolver.chooseRight
-                            markingSolverIcon = confSolverToIcon(solver: mergerController.settings.markingResolver)
-                        }, label: {
-                            Text("Right")
-                            Image(systemName: "arrow.right")
-                        })
-                    } label: {
-                        VStack {
-                            Image(systemName: "pencil.tip")
-                            Image(systemName: markingSolverIcon)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                                .padding(.top, 0.3)
-
-                        }
-                        .frame(height: 60)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
-                Spacer()
-                VStack {
-                    Menu {
-                        Button(action: {
-                            mergerController.settings.noteResolver = ConflictSolver.disabled
-                            noteSolverIcon = confSolverToIcon(solver: mergerController.settings.noteResolver)
-                        }, label: {
-                            Text("Manual")
-                            Image(systemName: "minus.circle")
-                        })
-                        Button(action: {
-                            mergerController.settings.noteResolver = ConflictSolver.chooseNewest
-                            noteSolverIcon = confSolverToIcon(solver: mergerController.settings.noteResolver)
-                        }, label: {
-                            Text("Newest")
-                            Image(systemName: "sparkles")
-                        })
-                        Button(action: {
-                            mergerController.settings.noteResolver = ConflictSolver.chooseLeft
-                            noteSolverIcon = confSolverToIcon(solver: mergerController.settings.noteResolver)
-                        }, label: {
-                            Text("Left")
-                            Image(systemName: "arrow.left")
-                        })
-                        Button(action: {
-                            mergerController.settings.noteResolver = ConflictSolver.chooseRight
-                            noteSolverIcon = confSolverToIcon(solver: mergerController.settings.noteResolver)
-                        }, label: {
-                            Text("Right")
-                            Image(systemName: "arrow.right")
-                        })
-                    } label: {
-                        VStack {
-                            Image(systemName: "note.text")
-                            Image(systemName: noteSolverIcon)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                                .padding(.top, 0.3)
-                        }
-                        .frame(height: 60)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        Spacer()
-                        Spacer()
-                    }
-                }
-                Spacer()
-                VStack {
-                    Menu {
-                        Button(action: {
-                            mergerController.settings.inputFieldResolver = ConflictSolver.disabled
-                            inputFieldSolverIcon = confSolverToIcon(solver:
-                                                                        mergerController.settings.inputFieldResolver)
-                        }, label: {
-                            Text("Manual")
-                            Image(systemName: "minus.circle")
-                        })
-                        Button(action: {
-                            mergerController.settings.inputFieldResolver = ConflictSolver.chooseLeft
-                            inputFieldSolverIcon = confSolverToIcon(solver:
-                                                                        mergerController.settings.inputFieldResolver)
-                        }, label: {
-                            Text("Left")
-                            Image(systemName: "arrow.left")
-                        })
-                        Button(action: {
-                            mergerController.settings.inputFieldResolver = ConflictSolver.chooseRight
-                            inputFieldSolverIcon = confSolverToIcon(solver:
-                                                                        mergerController.settings.inputFieldResolver)
-                        }, label: {
-                            Text("Right")
-                            Image(systemName: "arrow.right")
-                        })
-                    } label: {
-                        VStack {
-                            Image(systemName: "textbox")
-                            Image(systemName: inputFieldSolverIcon)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                                .padding(.top, 0.3)
-                        }
-                        .frame(height: 60)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        Spacer()
-                        Spacer()
-                    }
-                }
+                SolverMenu(systemImage: "bookmark", solver: $mergerController.settings.bookmarkResolver)
+                SolverMenu(systemImage: "pencil.tip", solver: $mergerController.settings.markingResolver)
+                SolverMenu(systemImage: "note.text", solver: $mergerController.settings.noteResolver,
+                           choices: [.disabled, .chooseNewest, .chooseLeft, .chooseRight])
+                SolverMenu(systemImage: "textbox", solver: $mergerController.settings.inputFieldResolver)
+                SolverMenu(systemImage: "list.and.film", solver: $mergerController.settings.playlistResolver)
             }
+            .padding(.horizontal)
             .font(.title2)
             .padding(.bottom, 4)
         }
@@ -218,15 +61,50 @@ struct MergeSettingsView_Previews: PreviewProvider {
     }
 }
 
-func confSolverToIcon(solver: ConflictSolver) -> String {
-    switch solver {
-    case .disabled:
-        return "minus.circle"
-    case .chooseLeft:
-        return "arrow.left"
-    case .chooseRight:
-        return "arrow.right"
-    case .chooseNewest:
-        return "sparkles"
+private struct SolverMenu: View {
+    let systemImage: String
+    @Binding var solver: ConflictSolver
+    var choices: [ConflictSolver] = [.disabled, .chooseLeft, .chooseRight]
+
+    var body: some View {
+        Menu {
+            ForEach(choices, id: \.self) { choice in
+                Button(action: {
+                    solver = choice
+                }, label: {
+                    Text(choice.title)
+                    Image(systemName: choice.icon)
+                })
+            }
+        } label: {
+            VStack {
+                Image(systemName: systemImage)
+                Image(systemName: solver.icon)
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .padding(.top, 0.3)
+            }
+            .frame(maxWidth: .infinity, minHeight: 60)
+        }
+    }
+}
+
+private extension ConflictSolver {
+    var title: LocalizedStringKey {
+        switch self {
+        case .disabled: return "Manual"
+        case .chooseLeft: return "Left"
+        case .chooseRight: return "Right"
+        case .chooseNewest: return "Newest"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .disabled: return "minus.circle"
+        case .chooseLeft: return "arrow.left"
+        case .chooseRight: return "arrow.right"
+        case .chooseNewest: return "sparkles"
+        }
     }
 }

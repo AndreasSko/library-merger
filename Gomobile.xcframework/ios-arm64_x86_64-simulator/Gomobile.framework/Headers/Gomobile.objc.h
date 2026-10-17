@@ -39,6 +39,8 @@ of the slices.
 @property (nonatomic) long tag;
 @property (nonatomic) long tagMap;
 @property (nonatomic) long userMark;
+@property (nonatomic) long playlist;
+@property (nonatomic) long playlistItem;
 @end
 
 /**
@@ -53,9 +55,14 @@ Database structs so they can be used with Gomobile.
 - (nonnull instancetype)init;
 @property (nonatomic) NSString* _Nonnull tempDir;
 /**
- * DBContainsPlaylists indicates if a DB on the given side contains playlists.
+ * Close releases temporary files after export or cancellation.
  */
-- (BOOL)dbContainsPlaylists:(NSString* _Nullable)side;
+- (BOOL)close:(NSError* _Nullable* _Nullable)error;
+/**
+ * DBContainsUnsupportedPlaylists indicates if the playlists of the DB on the
+given side were left out, because they cannot be merged yet.
+ */
+- (BOOL)dbContainsUnsupportedPlaylists:(NSString* _Nullable)side;
 /**
  * DBIsLoaded indicates if a DB on the given side has been loaded.
  */
@@ -73,7 +80,7 @@ on the given side.
  * Init initializes the DatabaseWrapper to prepare for subsequent
 function calls. Should be called after ImportJWLBackup.
  */
-- (void)init_;
+- (BOOL)init_:(NSError* _Nullable* _Nullable)error;
 /**
  * MergeBookmarks merges bookmarks
  */
@@ -91,6 +98,13 @@ function calls. Should be called after ImportJWLBackup.
  */
 - (BOOL)mergeNotes:(NSString* _Nullable)conflictSolver mcw:(GomobileMergeConflictsWrapper* _Nullable)mcw error:(NSError* _Nullable* _Nullable)error;
 /**
+ * MergePlaylists merges playlist items and media. Call it once after
+MergeLocations and MergeTags, and before MergeTagMaps, because it changes
+the playlist entries of the TagMaps. Conflicts can be resolved with
+chooseLeft/chooseRight or mcw.
+ */
+- (BOOL)mergePlaylists:(NSString* _Nullable)conflictSolver mcw:(GomobileMergeConflictsWrapper* _Nullable)mcw error:(NSError* _Nullable* _Nullable)error;
+/**
  * MergeTagMaps merges tagMaps
  */
 - (BOOL)mergeTagMaps:(NSError* _Nullable* _Nullable)error;
@@ -103,10 +117,16 @@ function calls. Should be called after ImportJWLBackup.
  */
 - (BOOL)mergeUserMarkAndBlockRange:(NSString* _Nullable)conflictSolver mcw:(GomobileMergeConflictsWrapper* _Nullable)mcw error:(NSError* _Nullable* _Nullable)error;
 /**
- * SkipPlaylists allows to skip the check if playlists exist in the database.
-It is meant as a temporary workaround until merging of playlists is implemented.
+ * PlaylistThumbnail returns the thumbnail of a playlist item in the imported
+backup on the given side, or the default thumbnail if the item has none.
  */
-- (void)skipPlaylists:(BOOL)skipPlaylists;
+- (NSData* _Nullable)playlistThumbnail:(NSString* _Nullable)side playlistItemID:(long)playlistItemID error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SkipUnsupportedPlaylists allows importing backups whose playlists use
+features that cannot be merged yet. Their playlists are left out instead,
+which DBContainsUnsupportedPlaylists reports.
+ */
+- (void)skipUnsupportedPlaylists:(BOOL)skip;
 /**
  * Stats generates a DatabaseStats for the given mergeSide
  */
@@ -123,7 +143,6 @@ to check progress and also cancel the download if necessary
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-@property (nonatomic) GomobileDownloadProgress* _Nullable progress;
 /**
  * CancelDownload cancels a running download
  */
@@ -136,6 +155,10 @@ to check progress and also cancel the download if necessary
  * Error returns possible errors of a download as a string
  */
 - (NSString* _Nonnull)error;
+/**
+ * GetProgress returns a snapshot that stays unchanged as the download advances.
+ */
+- (GomobileDownloadProgress* _Nullable)getProgress;
 @end
 
 /**
@@ -169,6 +192,7 @@ to make it compatible with Gomobile.
 @property (nonatomic) NSString* _Nonnull key;
 @property (nonatomic) NSString* _Nonnull left;
 @property (nonatomic) NSString* _Nonnull right;
+@property (nonatomic) NSString* _Nonnull changedFields;
 @end
 
 /**

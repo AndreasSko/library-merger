@@ -133,24 +133,28 @@ struct CatalogDBSettingsView: View {
 
     func downloadCatalog() {
         downloadError = ""
-        downloadManager = GomobileDownloadCatalog(catalogDBPath?.path)
-        if downloadManager == nil {
-            return
-        }
-
+        guard let manager = GomobileDownloadCatalog(catalogDBPath?.path) else { return }
+        downloadManager = manager
         isDownloading = true
         DispatchQueue.global().async {
-            while !(downloadManager!.progress?.done ?? false) {
-                downloadProgress = Float(downloadManager!.progress?.progress ?? 0)
-                usleep(2500)
+            while let snapshot = manager.getProgress(), !snapshot.done {
+                let percent = Float(snapshot.progress)
+                DispatchQueue.main.async {
+                    guard downloadManager === manager else { return }
+                    downloadProgress = percent
+                }
+                usleep(100_000)
             }
 
-            isDownloading = false
-            if downloadManager?.downloadSuccessful() ?? false {
-                catalogExists = GomobileCatalogExists(catalogDBPath?.path)
-                catalogNeedsUpdate = GomobileCatalogNeedsUpdate(catalogDBPath?.path)
-            } else if !(downloadManager?.progress?.canceled ?? false) {
-                downloadError = downloadManager?.error() ?? "Error while downloading"
+            DispatchQueue.main.async {
+                guard downloadManager === manager else { return }
+                isDownloading = false
+                if manager.downloadSuccessful() {
+                    catalogExists = GomobileCatalogExists(catalogDBPath?.path)
+                    catalogNeedsUpdate = GomobileCatalogNeedsUpdate(catalogDBPath?.path)
+                } else if !(manager.getProgress()?.canceled ?? false) {
+                    downloadError = manager.error()
+                }
             }
         }
     }

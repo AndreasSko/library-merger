@@ -24,7 +24,7 @@ struct PlaylistWarningView: View {
             Spacer()
             HStack {
                 Toggle(isOn: $warnOnPlaylist) {
-                    Text("Warn if backup contains playlist")
+                    Text("Warn if playlists are skipped")
                 }
             }
         }

@@ -10,19 +10,6 @@ import XCTest
 
 class LibraryMergerTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
     func testDocumentIDBeyondInt32Decodes() throws {
         let data = Data(#"{"Int64":4052170279,"Valid":true}"#.utf8)
 
@@ -32,11 +19,108 @@ class LibraryMergerTests: XCTestCase {
         XCTAssertTrue(documentID.valid)
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testUnknownConflictTypeThrows() {
+        XCTAssertThrowsError(try JSONDecoder().decode(Model.self, from: Data(#"{"type":"FutureModel"}"#.utf8)))
     }
 
+    func testPlaylistConflictCanBeResolvedAndExported() async throws {
+        let controller = MergerController()
+        try await controller.importBackup(url: fixture("base"), side: .leftSide)
+        try await controller.importBackup(url: fixture("conflict"), side: .rightSide)
+
+        do {
+            try await controller.merge(progress: MergeProgress())
+            XCTFail("Expected a playlist conflict")
+        } catch MergeError.mergeConflict { }
+
+        let conflict = try controller.nextConflict()
+        guard case .playlistItem(let item) = conflict.right?.model else {
+            return XCTFail("Expected a playlist item conflict")
+        }
+        XCTAssertEqual(item.label, "Changed A")
+        XCTAssertEqual(conflict.changedFields, [.label, .endAction])
+        XCTAssertEqual(conflict.right?.related.tag?.name, "Common")
+        XCTAssertEqual(conflict.right?.related.independentMedia?.originalFilename, "A.bin")
+
+        try controller.mergeConflicts.solveConflict(conflict.key, side: MergeSide.rightSide.rawValue)
+        try await controller.merge(reset: false, progress: MergeProgress())
+        XCTAssertEqual(controller.dbWrapper.stats("mergeSide")?.playlistItem, 3)
+        let exported = try await controller.exportBackup()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: exported))
+    }
+
+    func testPlaylistConflictCanBeResolvedAutomatically() async throws {
+        let controller = MergerController()
+        controller.settings.playlistResolver = .chooseRight
+        try await controller.importBackup(url: fixture("base"), side: .leftSide)
+        try await controller.importBackup(url: fixture("conflict"), side: .rightSide)
+
+        try await controller.merge(progress: MergeProgress())
+        XCTAssertEqual(controller.dbWrapper.stats("mergeSide")?.playlistItem, 3)
+    }
+
+    func testPlaylistDurationConflict() async throws {
+        let controller = MergerController()
+        try await controller.importBackup(url: fixture("base"), side: .leftSide)
+        try await controller.importBackup(url: fixture("duration"), side: .rightSide)
+
+        do {
+            try await controller.merge(progress: MergeProgress())
+            XCTFail("Expected a playlist conflict")
+        } catch MergeError.mergeConflict { }
+
+        let conflict = try controller.nextConflict()
+        XCTAssertEqual(conflict.changedFields, [.durationTicks])
+        XCTAssertEqual(conflict.right?.related.playlistItem?.label, "A")
+        let right = try XCTUnwrap(conflict.right?.model)
+        XCTAssertEqual(PlaylistChangedField.durationTicks.value(in: right),
+                       600.formatted(.number.precision(.fractionLength(0...7))) + " s")
+    }
+
+    func testPlaylistConflictShowsThumbnail() async throws {
+        let controller = MergerController()
+        try await controller.importBackup(url: fixture("publication-base"), side: .leftSide)
+        try await controller.importBackup(url: fixture("publication-action"), side: .rightSide)
+
+        do {
+            try await controller.merge(progress: MergeProgress())
+            XCTFail("Expected a playlist conflict")
+        } catch MergeError.mergeConflict { }
+
+        XCTAssertNotNil(try controller.nextConflict().thumbnail)
+    }
+
+    func testUnsupportedPlaylistsAreSkipped() async throws {
+        let controller = MergerController()
+        try await controller.importBackup(url: fixture("base"), side: .leftSide)
+        try await controller.importBackup(url: fixture("unsupported"), side: .rightSide)
+
+        XCTAssertFalse(controller.dbWrapper.dbContainsUnsupportedPlaylists(MergeSide.leftSide.rawValue))
+        XCTAssertTrue(controller.dbWrapper.dbContainsUnsupportedPlaylists(MergeSide.rightSide.rawValue))
+        XCTAssertEqual(controller.dbWrapper.stats(MergeSide.rightSide.rawValue)?.playlistItem, 0)
+
+        try await controller.merge(progress: MergeProgress())
+        XCTAssertEqual(controller.dbWrapper.stats("mergeSide")?.playlistItem, 3)
+    }
+
+    func testPlaylistChangedFieldValues() throws {
+        let json = #"{"type":"PlaylistItem","playlistItemId":1,"label":"Excerpt","#
+            + #""startTrimOffsetTicks":{"Int64":25000000,"Valid":true},"#
+            + #""endTrimOffsetTicks":{"Int64":0,"Valid":false},"accuracy":1,"endAction":3,"#
+            + #""thumbnailFilePath":{"String":"","Valid":false}}"#
+        let item = try JSONDecoder().decode(Model.self, from: Data(json.utf8))
+
+        XCTAssertEqual(PlaylistChangedField.label.value(in: item), "Excerpt")
+        XCTAssertEqual(PlaylistChangedField.endAction.value(in: item), NSLocalizedString("Repeat", comment: ""))
+        XCTAssertEqual(PlaylistChangedField.endTrimOffsetTicks.value(in: item),
+                       NSLocalizedString("Not set", comment: ""))
+        XCTAssertNil(PlaylistChangedField.durationTicks.value(in: item))
+        XCTAssertEqual(PlaylistChangedField.startTrimOffsetTicks.value(in: item),
+                       2.5.formatted(.number.precision(.fractionLength(0...7))) + " s")
+    }
+
+    private func fixture(_ name: String) throws -> URL {
+        try XCTUnwrap(Bundle(for: Self.self).url(forResource: name, withExtension: "jwlibrary",
+                                                subdirectory: "Fixtures"))
+    }
 }

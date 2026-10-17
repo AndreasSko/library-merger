@@ -8,6 +8,7 @@
 
 import Foundation
 import Gomobile
+import UIKit
 import Sentry
 
 enum MergeSide: String {
@@ -18,12 +19,15 @@ enum MergeSide: String {
 struct ModelRelatedTuple: Decodable {
     let model: Model
     let related: Related
+    let sourceURL: String?
 }
 
 struct MergeConflict {
     let key: String
     let left: ModelRelatedTuple?
     let right: ModelRelatedTuple?
+    var changedFields: [PlaylistChangedField] = []
+    var thumbnail: UIImage?
 }
 
 enum ConflictSolver: String {
@@ -38,6 +42,7 @@ struct MergeSettings {
     var markingResolver: ConflictSolver
     var noteResolver: ConflictSolver
     var inputFieldResolver: ConflictSolver
+    var playlistResolver: ConflictSolver
 }
 
 class MergeProgress: ObservableObject {
@@ -88,7 +93,7 @@ extension MergeError: LocalizedError {
 class MergerController: ObservableObject {
     var dbWrapper: GomobileDatabaseWrapper
     var mergeConflicts: GomobileMergeConflictsWrapper
-    var settings: MergeSettings
+    @Published var settings: MergeSettings
 
     private var solvedConflicts = 0
 
@@ -101,12 +106,13 @@ class MergerController: ObservableObject {
         self.settings = MergeSettings(bookmarkResolver: .disabled,
                                       markingResolver: .disabled,
                                       noteResolver: .disabled,
-                                      inputFieldResolver: .disabled)
+                                      inputFieldResolver: .disabled,
+                                      playlistResolver: .disabled)
     }
 
     func importBackup(url: URL, side: MergeSide) async throws {
         addBreadcrumb("importBackup from \(url.absoluteString) for side \(side.rawValue)")
-        self.dbWrapper.skipPlaylists(true)
+        self.dbWrapper.skipUnsupportedPlaylists(true)
 
         let accessGranted = url.startAccessingSecurityScopedResource()
         defer { url.stopAccessingSecurityScopedResource() }
@@ -246,9 +252,9 @@ class MergerController: ObservableObject {
             mergeConflicts.initDBWrapper(dbWrapper)
         }
 
-        dbWrapper.init_()
-
         do {
+            try dbWrapper.init_()
+
             await progress.update(status: "Merging Locations", percent: 14)
             try dbWrapper.mergeLocations()
 
@@ -266,6 +272,9 @@ class MergerController: ObservableObject {
 
             await progress.update(status: "Merging Notes", percent: 84)
             try dbWrapper.mergeNotes(self.settings.noteResolver.rawValue, mcw: self.mergeConflicts)
+
+            await progress.update(status: "Merging Playlists", percent: 91)
+            try dbWrapper.mergePlaylists(self.settings.playlistResolver.rawValue, mcw: self.mergeConflicts)
 
             await progress.update(status: "Merging TagMaps", percent: 98)
             try dbWrapper.mergeTagMaps()
@@ -288,7 +297,10 @@ class MergerController: ObservableObject {
                                                 from: conflict.left.data(using: .utf8)!)
             let right = try JSONDecoder().decode(ModelRelatedTuple.self,
                                                  from: conflict.right.data(using: .utf8)!)
-            return MergeConflict(key: conflict.key, left: left, right: right)
+            let changedFields = try JSONDecoder().decode([PlaylistChangedField].self,
+                                                         from: Data(conflict.changedFields.utf8))
+            return MergeConflict(key: conflict.key, left: left, right: right, changedFields: changedFields,
+                                 thumbnail: playlistThumbnail(left.model))
         } catch {
             if error.localizedDescription.starts(with: "There are no unsolved conflicts") {
                 throw MergeError.noConflicts
@@ -296,6 +308,17 @@ class MergerController: ObservableObject {
             SentrySDK.capture(error: error)
             throw error
         }
+    }
+
+    // Only item conflicts refer to the item IDs of the imported backup, which
+    // the thumbnail lookup needs. Items without a thumbnail show none.
+    private func playlistThumbnail(_ model: Model) -> UIImage? {
+        guard case .playlistItem(let item) = model, item.thumbnailFilePath.valid,
+              let data = try? dbWrapper.playlistThumbnail(MergeSide.leftSide.rawValue,
+                                                          playlistItemID: item.playlistItemId) else {
+            return nil
+        }
+        return UIImage(data: data)
     }
 }
 

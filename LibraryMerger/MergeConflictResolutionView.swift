@@ -25,40 +25,49 @@ struct MergeConflictResolutionView: View {
             try _conflict = State(initialValue: mergerController.nextConflict())
         } catch {
             _conflict = State(initialValue: MergeConflict(key: "", left: nil, right: nil))
+            _errorMessage = State(initialValue: error.localizedDescription)
+            _showError = State(initialValue: true)
         }
     }
 
     var body: some View {
         NavigationView {
-            VStack {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text("Conflict while merging")
-                            + Text(" \(NSLocalizedString(getConflictType(), comment: "Name of the conflict")).").bold()
+            // The whole conflict scrolls, so both choices stay reachable at large text sizes.
+            ScrollView {
+                VStack {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("Conflict while merging")
+                                + Text(" \(NSLocalizedString(getConflictType(), comment: "Name of the conflict")).")
+                                    .bold()
 
-                        Spacer()
+                            Spacer()
 
-                        Button(action: {
-                            helpOpened.toggle()
-                        }, label: {
-                            Image(systemName: "questionmark.circle")
-                        })
-                        .sheet(isPresented: $helpOpened) {
-                            HelpView(isPresented: $helpOpened,
-                                     title: NSLocalizedString("help.conflict.\(getConflictType()).title",
-                                                              comment: "Title for specific conflict help text"),
-                                     helpText: NSLocalizedString("help.conflict.\(getConflictType()).text",
-                                                              comment: "Help text for specific conflict"))
+                            Button(action: {
+                                helpOpened.toggle()
+                            }, label: {
+                                Image(systemName: "questionmark.circle")
+                            })
+                            .sheet(isPresented: $helpOpened) {
+                                HelpView(isPresented: $helpOpened,
+                                         title: NSLocalizedString("help.conflict.\(getConflictType()).title",
+                                                                  comment: "Title for specific conflict help text"),
+                                         helpText: NSLocalizedString("help.conflict.\(getConflictType()).text",
+                                                                  comment: "Help text for specific conflict"))
+                            }
+                        }
+                        Text(question)
+                        if conflict.changedFields.count > 1 {
+                            Text("Choose one version. All settings shown in that version will be kept.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
                     }
-                    Text("Which one should be included?")
-                }
-                .padding()
+                    .padding()
 
-                MergeConflictOverview(mrt: conflict.left)
-                    .padding(.top)
+                    MergeConflictOverview(mrt: conflict.left, thumbnail: conflict.thumbnail)
+                        .padding(.top)
 
-                ScrollView {
                     VStack {
                         MergeConflictDetailsView(conflict: conflict,
                                                  side: .leftSide)
@@ -73,6 +82,7 @@ struct MergeConflictResolutionView: View {
                             .onTapGesture(count: 1, perform: {
                                 selectedSide = .leftSide
                             })
+                            .accessibilityIdentifier("conflict-left")
 
                         MergeConflictDetailsView(conflict: conflict,
                                                  side: .rightSide)
@@ -85,11 +95,11 @@ struct MergeConflictResolutionView: View {
                             .onTapGesture(count: 1, perform: {
                                 selectedSide = .rightSide
                             })
+                            .accessibilityIdentifier("conflict-right")
                     }
                     .frame(maxWidth: .infinity)
-                    Spacer()
+                    .padding(.bottom)
                 }
-                .frame(maxWidth: .infinity)
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
@@ -99,7 +109,7 @@ struct MergeConflictResolutionView: View {
                     presentationMode.wrappedValue.dismiss()
                 }, label: {
                     Text("Cancel")
-                })), trailing: (
+                }).accessibilityIdentifier("cancel-conflicts")), trailing: (
                 Button(action: {
                     do {
                         try mergerController.mergeConflicts.solveConflict(conflict.key, side: selectedSide?.rawValue)
@@ -114,12 +124,22 @@ struct MergeConflictResolutionView: View {
                 }, label: {
                     Text("Continue")
                 }).disabled(selectedSide == nil)
+                .accessibilityIdentifier("continue-conflicts")
                 )
             )
         }
         .sheet(isPresented: $showError) {
             ErrorView(error: $errorMessage)
         }
+    }
+
+    var question: String {
+        if conflict.changedFields.count == 1 {
+            return conflict.changedFields[0].question
+        } else if !conflict.changedFields.isEmpty {
+            return NSLocalizedString("Which settings should this item use?", comment: "Playlist conflict question")
+        }
+        return NSLocalizedString("Which one should be included?", comment: "Conflict question")
     }
 
     func getConflictType() -> String {
@@ -133,6 +153,8 @@ struct MergeConflictResolutionView: View {
             return "notes"
         case .inputField:
             return "input fields"
+        case .playlistItem, .playlistItemLocationMap, .playlistItemIndependentMediaMap:
+            return "playlist items"
         default:
             return "error"
         }

@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0DE00120000000000000001 /* PlaylistChangedField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00120000000000000002 /* PlaylistChangedField.swift */; };
+		AABBCCDD0000000000000001 /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = AABBCCDD0000000000000002 /* Fixtures */; };
 		F402E1D827789A020083C4EB /* Gomobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F402E1D727789A020083C4EB /* Gomobile.xcframework */; };
 		F402E1DC277DB4C70083C4EB /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F402E1DB277DB4C70083C4EB /* ErrorView.swift */; };
-		F420DFC2255C0C6900CEB66B /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43574EF253341CB00EC55D4 /* BackupView.swift */; };
 		F42649AE257E469100644CA6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F42649AD257E469100644CA6 /* SettingsView.swift */; };
 		F433F8F12573C11B00258C29 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F433F8F02573C11B00258C29 /* OnboardingView.swift */; };
 		F434746D2A6835AD00CC424E /* PlaylistWarningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F434746C2A6835AD00CC424E /* PlaylistWarningView.swift */; };
@@ -60,6 +61,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0DE00120000000000000002 /* PlaylistChangedField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistChangedField.swift; sourceTree = "<group>"; };
+		AABBCCDD0000000000000002 /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fixtures; sourceTree = "<group>"; };
 		F402E1D727789A020083C4EB /* Gomobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Gomobile.xcframework; sourceTree = "<group>"; };
 		F402E1DB277DB4C70083C4EB /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		F420DF9B255B34E800CEB66B /* LibraryMerger.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LibraryMerger.entitlements; sourceTree = "<group>"; };
@@ -168,6 +171,7 @@
 				F44BF8502534D5070057B980 /* MergeConflictResolutionView.swift */,
 				F447E5BC255A7BC000C3DA35 /* MergeConflictOverview.swift */,
 				F441B1612549CEB100B0409B /* MergeConflictDetailsView.swift */,
+				C0DE00120000000000000002 /* PlaylistChangedField.swift */,
 				F48F44B5255E808B0050C564 /* HelpView.swift */,
 				F402E1DB277DB4C70083C4EB /* ErrorView.swift */,
 				F434746C2A6835AD00CC424E /* PlaylistWarningView.swift */,
@@ -195,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */,
+				AABBCCDD0000000000000002 /* Fixtures */,
 				F43574CA2533411B00EC55D4 /* Info.plist */,
 			);
 			path = LibraryMergerTests;
@@ -359,6 +364,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AABBCCDD0000000000000001 /* Fixtures in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,6 +442,7 @@
 				F4B8AEA725867E0B008DF433 /* CatalogDBSettingsView.swift in Sources */,
 				F434746D2A6835AD00CC424E /* PlaylistWarningView.swift in Sources */,
 				F441B1622549CEB100B0409B /* MergeConflictDetailsView.swift in Sources */,
+				C0DE00120000000000000001 /* PlaylistChangedField.swift in Sources */,
 				F44BF830253376B10057B980 /* MergeSettingsView.swift in Sources */,
 				F43574F0253341CB00EC55D4 /* BackupView.swift in Sources */,
 				F44BF838253476110057B980 /* ExportView.swift in Sources */,
@@ -457,7 +464,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F420DFC2255C0C6900CEB66B /* BackupView.swift in Sources */,
 				F43574D42533411B00EC55D4 /* LibraryMergerUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -543,7 +549,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -600,7 +606,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -617,7 +623,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LibraryMerger/LibraryMerger.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = "\"LibraryMerger/Preview Content\"";
 				DEVELOPMENT_TEAM = 9YFM7J3EH3;
 				ENABLE_PREVIEWS = YES;
@@ -626,12 +632,12 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = LibraryMerger/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.1;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.andreas-sk.jwlm";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -646,7 +652,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LibraryMerger/LibraryMerger.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = "\"LibraryMerger/Preview Content\"";
 				DEVELOPMENT_TEAM = 9YFM7J3EH3;
 				ENABLE_PREVIEWS = YES;
@@ -655,12 +661,12 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = LibraryMerger/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.1;
+				MARKETING_VERSION = 0.9.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.andreas-sk.jwlm";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -675,7 +681,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 95P96TD862;
 				INFOPLIST_FILE = LibraryMergerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -696,7 +702,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 95P96TD862;
 				INFOPLIST_FILE = LibraryMergerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

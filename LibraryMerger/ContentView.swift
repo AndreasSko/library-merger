@@ -90,6 +90,22 @@ struct ContentView: View {
         .onOpenURL { url in
             sharedUrl = url
         }
+        #if DEBUG
+        .task {
+            // UI tests pass the backups to merge, as they can't use the file picker.
+            let environment = ProcessInfo.processInfo.environment
+            guard let left = environment["UI_TEST_LEFT_BACKUP"],
+                  let right = environment["UI_TEST_RIGHT_BACKUP"] else { return }
+            do {
+                try await mergerController.importBackup(url: URL(fileURLWithPath: left), side: .leftSide)
+                try await mergerController.importBackup(url: URL(fileURLWithPath: right), side: .rightSide)
+                leftSelected = true
+                rightSelected = true
+            } catch {
+                assertionFailure("UI test backup import failed: \(error)")
+            }
+        }
+        #endif
     }
 }
 

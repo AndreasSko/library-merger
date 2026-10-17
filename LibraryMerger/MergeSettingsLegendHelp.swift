@@ -35,6 +35,11 @@ struct MergeSettingsLegendHelp: View {
                     Text("Input fields")
                         .alignmentGuide(.custom) { $0[.leading] }
                 }
+                HStack {
+                    Image(systemName: "list.and.film")
+                    Text("Playlists")
+                        .alignmentGuide(.custom) { $0[.leading] }
+                }
             }
         }
         .padding(.top, 40)
