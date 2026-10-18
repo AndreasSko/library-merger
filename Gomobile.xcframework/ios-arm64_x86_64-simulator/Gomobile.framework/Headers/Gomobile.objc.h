@@ -19,6 +19,12 @@
 @class GomobileMergeConflictError;
 @class GomobileMergeConflictsWrapper;
 @class GomobilePublicationLookup;
+@protocol GomobileDownloadListener;
+@class GomobileDownloadListener;
+
+@protocol GomobileDownloadListener <NSObject>
+- (void)progress:(int64_t)downloaded total:(int64_t)total;
+@end
 
 /**
  * DatabaseStats represents the rough number of entries
@@ -226,6 +232,13 @@ so the DB is accessible for pretty printing.
  */
 - (void)initDBWrapper:(GomobileDatabaseWrapper* _Nullable)dbw;
 /**
+ * MarkingSnippets returns the text of the paragraphs that the marking on the
+given side of a conflict covers, as a JSON array of publication.Snippet. If
+the text of the publication is not cached in cacheDir yet, it is downloaded
+from jw.org, and listener, if not nil, is told the progress.
+ */
+- (NSString* _Nonnull)markingSnippets:(NSString* _Nullable)key side:(NSString* _Nullable)side cacheDir:(NSString* _Nullable)cacheDir listener:(id<GomobileDownloadListener> _Nullable)listener error:(NSError* _Nullable* _Nullable)error;
+/**
  * NextConflict returns the next conflict that should be solved. If there
 are no left, it returns an error
  */
@@ -280,5 +293,19 @@ FOUNDATION_EXPORT GomobileDownloadManager* _Nullable GomobileDownloadCatalog(NSS
 and returns a JSON string representing the Publication
  */
 FOUNDATION_EXPORT NSString* _Nonnull GomobileLookupPublication(NSString* _Nullable dbPath, GomobilePublicationLookup* _Nullable query);
+
+@class GomobileDownloadListener;
+
+/**
+ * DownloadListener is told how many bytes of a publication are downloaded,
+out of total, which is -1 if unknown
+ */
+@interface GomobileDownloadListener : NSObject <goSeqRefInterface, GomobileDownloadListener> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)progress:(int64_t)downloaded total:(int64_t)total;
+@end
 
 #endif
