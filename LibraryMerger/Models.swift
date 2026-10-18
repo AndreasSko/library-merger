@@ -164,6 +164,18 @@ struct UserMarkBlockRange: Decodable {
     let blockRanges: [BlockRange]
 }
 
+// MarkingSnippet is a paragraph that a marking covers, split around the marked text
+struct MarkingSnippet: Decodable, Equatable {
+    let before: String
+    let marked: String
+    let after: String
+    // The paragraph number shown in the publication and the subheading it belongs to
+    let number: Int?
+    let heading: String?
+    // The number of a Bible verse
+    var verse: Int?
+}
+
 struct NullInt32: Decodable {
     enum CodingKeys: String, CodingKey {
         case int32 = "Int32"

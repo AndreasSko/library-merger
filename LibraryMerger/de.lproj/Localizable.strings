@@ -40,7 +40,25 @@
 // MergeConflictDetailsView
 "Title:" = "Titel:";
 "Snippet:" = "Vorschau:";
-"Color:" = "Farbe:";
+"Marked: %@" = "Markiert: %@";
+"Show marked text" = "Markierten Text anzeigen";
+"Paragraph %d" = "Absatz %d";
+"Words %d–%d" = "Wörter %d–%d";
+"Verse %d · words %d–%d" = "Vers %d · Wörter %d–%d";
+"%@ of %@" = "%@ von %@";
+"Load text from jw.org" = "Text von jw.org laden";
+"Verse %d" = "Vers %d";
+"Couldn't load the text from jw.org" = "Text konnte nicht von jw.org geladen werden";
+"jw.org has no text of this publication" = "Auf jw.org gibt es keinen Text dieser Publikation";
+"Try again" = "Erneut versuchen";
+"Hide text" = "Text ausblenden";
+"Show the marked text?" = "Markierten Text anzeigen?";
+"Show Text" = "Text anzeigen";
+"Not Now" = "Nicht jetzt";
+"markingText.info" = "Der Text stammt aus der EPUB-Version der Publikation auf jw.org. Auf diesem Gerät wird nur der Text gespeichert, er braucht also wenig Platz. Du kannst es in den Einstellungen ausschalten.";
+"Downloaded text" = "Heruntergeladener Text";
+"Delete downloaded text" = "Heruntergeladenen Text löschen";
+"settings.markingText.footer" = "Zeigt bei Konflikten den Text der Markierungen. Library Merger lädt dazu jede Publikation einmal von jw.org herunter und behält nur ihren Text auf diesem Gerät.";
 "Paragraph:" = "Absatz:";
 "Content:" = "Inhalt:";
 "Last Modified:" = "Zuletzt geändert:";

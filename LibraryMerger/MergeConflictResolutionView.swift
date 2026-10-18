@@ -17,6 +17,16 @@ struct MergeConflictResolutionView: View {
     @State private var helpOpened = false
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
+    @AppStorage("showMarkingText") private var showMarkingText = false
+    @AppStorage("markingTextInfoShown") private var markingTextInfoShown = false
+    @State private var showMarkingTextInfo = false
+    // The marked paragraphs of each side, once they are loaded
+    @State private var snippets: [MergeSide: [MarkingSnippet]] = [:]
+    @State private var markingTextFailed = false
+    @State private var download = (key: "", downloaded: Int64(0), total: Int64(-1))
+    // Trying again to load the text starts a new lookup
+    @State private var markingTextAttempt = 0
+    @State private var scrollLink = ScrollLink()
 
     init (mergerController: MergerController, cancelMerge: Binding<Bool>) {
         self.mergerController = mergerController
@@ -70,7 +80,8 @@ struct MergeConflictResolutionView: View {
 
                     VStack {
                         MergeConflictDetailsView(conflict: conflict,
-                                                 side: .leftSide)
+                                                 side: .leftSide,
+                                                 markingText: markingText(.leftSide))
                             .if((selectedSide == MergeSide.leftSide)) { view in
                                 view.overlay(
                                     RoundedRectangle(cornerRadius: 10)
@@ -85,7 +96,8 @@ struct MergeConflictResolutionView: View {
                             .accessibilityIdentifier("conflict-left")
 
                         MergeConflictDetailsView(conflict: conflict,
-                                                 side: .rightSide)
+                                                 side: .rightSide,
+                                                 markingText: markingText(.rightSide))
                             .if((selectedSide == MergeSide.rightSide)) { view in
                                 view.overlay(
                                     RoundedRectangle(cornerRadius: 10)
@@ -101,6 +113,38 @@ struct MergeConflictResolutionView: View {
                     .padding(.bottom)
                 }
             }
+            .task(id: "\(conflict.key) \(showMarkingText) \(markingTextAttempt)") {
+                markingTextFailed = false
+                guard showMarkingText, hasMarkingText else { return }
+                let key = conflict.key
+                download = (key, 0, -1)
+                // Both sides share one download, and progress of an earlier conflict's download is ignored
+                let listener = DownloadListener { downloaded, total in
+                    if download.key == key {
+                        download = (key, downloaded, total)
+                    }
+                }
+                async let left = mergerController.markingSnippets(key: key, side: .leftSide, listener: listener)
+                async let right = mergerController.markingSnippets(key: key, side: .rightSide, listener: listener)
+                // The lookup can't be stopped, so its result may arrive after the next conflict is shown
+                do {
+                    let loaded = try await [MergeSide.leftSide: left, .rightSide: right]
+                    guard !Task.isCancelled else { return }
+                    snippets = loaded
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    markingTextFailed = true
+                }
+            }
+            .sheet(isPresented: $showMarkingTextInfo) {
+                MarkingTextInfo(showText: {
+                    markingTextInfoShown = true
+                    showMarkingText = true
+                    showMarkingTextInfo = false
+                }, notNow: {
+                    showMarkingTextInfo = false
+                })
+            }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(leading: (
@@ -115,6 +159,7 @@ struct MergeConflictResolutionView: View {
                         try mergerController.mergeConflicts.solveConflict(conflict.key, side: selectedSide?.rawValue)
                         try conflict = mergerController.nextConflict()
                         selectedSide = nil
+                        snippets = [:]
                     } catch MergeError.noConflicts {
                         presentationMode.wrappedValue.dismiss()
                     } catch {
@@ -131,6 +176,33 @@ struct MergeConflictResolutionView: View {
         .sheet(isPresented: $showError) {
             ErrorView(error: $errorMessage)
         }
+    }
+
+    // Markings in paragraphs of publications (block type 1) and in Bible verses (block type 2) have text to show
+    var hasMarkingText: Bool {
+        guard case .userMarkBlockRange(let umbr) = conflict.left?.model else { return false }
+        return umbr.blockRanges.contains { $0.blockType == 1 || $0.blockType == 2 }
+    }
+
+    func markingText(_ side: MergeSide) -> MarkingText {
+        MarkingText(enabled: showMarkingText, available: hasMarkingText, snippets: snippets[side],
+                    failed: markingTextFailed,
+                    downloaded: download.downloaded, total: download.total,
+                    load: {
+                        // The first time, a short explanation tells where the text comes from
+                        if showMarkingText {
+                            snippets = [:]
+                            markingTextAttempt += 1
+                        } else if markingTextInfoShown {
+                            showMarkingText = true
+                        } else {
+                            showMarkingTextInfo = true
+                        }
+                    },
+                    hide: { showMarkingText = false },
+                    link: scrollLink,
+                    select: { selectedSide = side },
+                    otherSnippets: snippets[side == .leftSide ? .rightSide : .leftSide])
     }
 
     var question: String {

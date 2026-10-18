@@ -10,6 +10,8 @@ import SwiftUI
 struct SettingsView: View {
     @State var selection: String?
     @AppStorage("warnOnPlaylist") private var warnOnPlaylist: Bool = true
+    @AppStorage("showMarkingText") private var showMarkingText = false
+    @State private var publicationCacheSize: Int64 = 0
 
     init() {}
     init(selection: String) {
@@ -49,6 +51,30 @@ struct SettingsView: View {
                         Text("Show Notification again")
                     })
                     #endif
+                }
+
+                Section(footer: Text("settings.markingText.footer")) {
+                    Toggle(isOn: $showMarkingText) {
+                        Text("Show marked text")
+                    }
+
+                    HStack {
+                        Text("Downloaded text")
+                        Spacer()
+                        Text(ByteCountFormatter.string(fromByteCount: publicationCacheSize, countStyle: .file))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Button(role: .destructive, action: {
+                        try? FileManager.default.removeItem(at: publicationCacheDir)
+                        publicationCacheSize = LibraryMerger.publicationCacheSize()
+                    }, label: {
+                        Text("Delete downloaded text")
+                    })
+                    .disabled(publicationCacheSize == 0)
+                }
+                .onAppear {
+                    publicationCacheSize = LibraryMerger.publicationCacheSize()
                 }
 
                 Section {

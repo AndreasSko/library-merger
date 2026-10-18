@@ -11,6 +11,19 @@ import Gomobile
 let catalogDBPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
                     .appendingPathComponent("catalog.db")
 
+// The text of publications for marking conflicts is cached, so each one is downloaded only once
+let publicationCacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+    .appendingPathComponent("publications")
+
+// publicationCacheSize returns the size of the cached publication text in bytes
+func publicationCacheSize() -> Int64 {
+    let files = (try? FileManager.default.contentsOfDirectory(at: publicationCacheDir,
+                                                              includingPropertiesForKeys: [.fileSizeKey])) ?? []
+    return files.reduce(0) { size, file in
+        size + Int64((try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+    }
+}
+
 struct Publication: Decodable {
     let id: Int
     let publicationRootKeyId: Int
