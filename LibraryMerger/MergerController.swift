@@ -94,6 +94,7 @@ class MergerController: ObservableObject {
     var dbWrapper: GomobileDatabaseWrapper
     var mergeConflicts: GomobileMergeConflictsWrapper
     @Published var settings: MergeSettings
+    var publicationCacheDir = LibraryMerger.publicationCacheDir
 
     private var solvedConflicts = 0
 
@@ -310,6 +311,26 @@ class MergerController: ObservableObject {
         }
     }
 
+    // markingSnippets returns the paragraphs that the marking on one side of a conflict covers.
+    // The first lookup of a publication downloads it from jw.org, so this runs in the background,
+    // and listener is told the progress. If jw.org has no text of the publication, it returns no
+    // paragraphs. It throws if the text could not be loaded, for example when offline.
+    func markingSnippets(key: String, side: MergeSide, listener: DownloadListener? = nil) async throws
+        -> [MarkingSnippet] {
+        do {
+            var lookupError: NSError?
+            let json = mergeConflicts.markingSnippets(key, side: side.rawValue, cacheDir: publicationCacheDir.path,
+                                                      listener: listener, error: &lookupError)
+            if let lookupError = lookupError {
+                throw lookupError
+            }
+            return try JSONDecoder().decode([MarkingSnippet].self, from: Data(json.utf8))
+        } catch {
+            addBreadcrumb("markingSnippets failed: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
     // Only item conflicts refer to the item IDs of the imported backup, which
     // the thumbnail lookup needs. Items without a thumbnail show none.
     private func playlistThumbnail(_ model: Model) -> UIImage? {
@@ -319,6 +340,22 @@ class MergerController: ObservableObject {
             return nil
         }
         return UIImage(data: data)
+    }
+}
+
+// DownloadListener reports on the main thread how many bytes of a publication are downloaded,
+// out of total, which is -1 if unknown
+final class DownloadListener: NSObject, GomobileDownloadListenerProtocol {
+    private let report: (Int64, Int64) -> Void
+
+    init(report: @escaping (Int64, Int64) -> Void) {
+        self.report = report
+    }
+
+    func progress(_ downloaded: Int64, total: Int64) {
+        DispatchQueue.main.async {
+            self.report(downloaded, total)
+        }
     }
 }
 

@@ -103,6 +103,35 @@ class LibraryMergerTests: XCTestCase {
         XCTAssertEqual(controller.dbWrapper.stats("mergeSide")?.playlistItem, 3)
     }
 
+    func testMarkingConflictShowsMarkedText() async throws {
+        let controller = MergerController()
+        // A cached publication keeps the test offline
+        controller.publicationCacheDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: controller.publicationCacheDir,
+                                                withIntermediateDirectories: true)
+        let paragraph = "One two three four five six seven eight nine ten "
+            + "eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty."
+        try Data(#"{"2025405":{"7":{"text":"\#(paragraph)","number":1}}}"#.utf8)
+            .write(to: controller.publicationCacheDir.appendingPathComponent("w_E_20250500.json"))
+        try await controller.importBackup(url: fixture("marking-left"), side: .leftSide)
+        try await controller.importBackup(url: fixture("marking-right"), side: .rightSide)
+
+        do {
+            try await controller.merge(progress: MergeProgress())
+            XCTFail("Expected a marking conflict")
+        } catch MergeError.mergeConflict { }
+
+        let conflict = try controller.nextConflict()
+        let left = try await controller.markingSnippets(key: conflict.key, side: .leftSide)
+        let right = try await controller.markingSnippets(key: conflict.key, side: .rightSide)
+        XCTAssertEqual(left, [MarkingSnippet(before: "One two three four five six seven eight nine ",
+                                             marked: "ten eleven twelve thirteen fourteen",
+                                             after: " fifteen sixteen seventeen eighteen nineteen twenty.",
+                                             number: 1, heading: nil)])
+        XCTAssertEqual(right.first?.marked, "thirteen fourteen fifteen sixteen seventeen eighteen nineteen")
+    }
+
     func testPlaylistChangedFieldValues() throws {
         let json = #"{"type":"PlaylistItem","playlistItemId":1,"label":"Excerpt","#
             + #""startTrimOffsetTicks":{"Int64":25000000,"Valid":true},"#

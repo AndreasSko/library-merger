@@ -53,6 +53,8 @@ To figure out where the marking is located, look at the additional information: 
 // Settings
 "settings.catalogDB.quickInfo" = "Download the Publication Catalog to see more detailed information when merging.";
 "settings.catalogDB.downloadSize" = "Downloading the catalog takes about 50MB.";
+"settings.markingText.footer" = "Shows the text of conflicting markings. For this, Library Merger downloads each publication once from jw.org and keeps only its text on this device.";
+"markingText.info" = "The text comes from the EPUB version of the publication on jw.org. Only the text is kept on this device, so it takes up little space. You can turn it off in Settings.";
 "settings.catalogDB.explainer" = "It's a database that contains information about all the publications of the last years. With its help you are able to get more detailed information (like the title of a publication) when solving a merge conflicts. But you can also use the app without downloading it.";
 "settings.catalogDB.disclaimer" = "The catalog is downloaded from app.jw-cdn.org, which is operated by Watchtower Bible and Tract Society of New York, Inc. You may want to consider their Privacy Policy if you are not sure what data might be processed when you initialize the download.";
 
