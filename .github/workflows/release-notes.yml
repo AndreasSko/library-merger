@@ -1,0 +1,83 @@
+name: Release notes
+
+# Adds each merged PR's first paragraph to the draft GitHub release of the
+# version main builds. See docs/releasing.md.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Number of a merged PR to add
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: read
+
+# Queued, not canceled: each run adds a different PR.
+concurrency:
+  group: release-notes
+  cancel-in-progress: false
+
+# bash -eo pipefail, so a failing command in a pipe fails its step
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  draft:
+    name: Update the draft release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Add the PR to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ inputs.pr }}
+        run: |
+          if [[ -n $PR ]]; then
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR")
+            jq -e '.merged_at' <<< "$pr" > /dev/null || {
+              echo "::error::#$PR isn't merged."
+              exit 1
+            }
+          else
+            pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[0] // empty')
+          fi
+          [[ -n $pr ]] || { echo "No PR belongs to this commit."; exit 0; }
+          number=$(jq -r .number <<< "$pr")
+          if jq -e 'any(.labels[]; .name == "no-release-note")' <<< "$pr" > /dev/null; then
+            echo "#$number is labeled no-release-note."
+            exit 0
+          fi
+          note=$(jq -r '.body // ""' <<< "$pr" | scripts/release_notes.py paragraph)
+          [[ -n $note ]] || { echo "#$number has no description."; exit 0; }
+
+          version=$(scripts/app_version.sh)
+          entry="- $note (#$number)"
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq "[.[] | select(.draft and .tag_name == \"v$version\")][0] // empty")
+          if [[ -z $release ]]; then
+            # Fails when v$version was just published; the PR then
+            # belongs to the next draft, which a rerun picks.
+            gh api -X POST "repos/$GITHUB_REPOSITORY/releases" -f tag_name="v$version" \
+              -f name="$version" -F draft=true -f body="$entry" > /dev/null || {
+              echo "::error::Couldn't start the draft v$version. If it was just published, rerun this."
+              exit 1
+            }
+            echo "Started the draft release v$version with #$number." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          body=$(jq -r '.body // ""' <<< "$release")
+          if grep -qF "(#$number)" <<< "$body"; then
+            echo "#$number is already in the draft release v$version."
+            exit 0
+          fi
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$(jq -r .id <<< "$release")" \
+            -f body="$body"$'\n'"$entry" > /dev/null
+          echo "Added #$number to the draft release v$version." >> "$GITHUB_STEP_SUMMARY"

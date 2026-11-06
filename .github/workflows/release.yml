@@ -1,0 +1,80 @@
+name: App Store release
+
+# Publishing a GitHub release prepares its builds in App Store Connect,
+# with the release text as What's New. Submit for review there manually.
+# Nothing is rebuilt.
+# See docs/releasing.md.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to prepare again, like v0.10.1
+        required: true
+
+permissions:
+  contents: read
+  statuses: read
+
+concurrency:
+  group: app-store-release
+  cancel-in-progress: false
+
+# bash -eo pipefail, so a failing command in a pipe fails its step
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  prepare:
+    name: Prepare for App Review
+    environment: app-store
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      ASC_APP_ID: ${{ vars.ASC_APP_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+      ASC_BYPASS_KEYCHAIN: '1'
+      ASC_NO_UPDATE: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+      - uses: rudrankriyam/setup-asc@5358c70a27a3f0d1517604b0f1fdc43e70c1cc4d
+        with:
+          version: 6.3.0
+      - name: Find the builds
+        id: builds
+        run: |
+          [[ $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::$TAG is not a release tag like v0.10.1."
+            exit 1
+          }
+          scripts/testflight_builds.sh "$TAG" | tee -a "$GITHUB_OUTPUT" > builds.txt
+          version=$(sed -n 's/^version=//p' builds.txt)
+          [[ $version == "${TAG#v}" ]] || {
+            echo "::error::$TAG points at builds of version $version."
+            exit 1
+          }
+      - name: Write What's New
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body \
+            | scripts/release_notes.py plain > "$RUNNER_TEMP/whats-new.txt"
+          [[ -s "$RUNNER_TEMP/whats-new.txt" ]] || {
+            echo "::error::The release $TAG has no text for What's New."
+            exit 1
+          }
+          cat "$RUNNER_TEMP/whats-new.txt"
+      - name: Prepare iOS for review
+        env:
+          VERSION: ${{ steps.builds.outputs.version }}
+          IOS_BUILD: ${{ steps.builds.outputs.ios }}
+          STORE_LOCALE: ${{ vars.APP_STORE_LOCALE || 'en-US' }}
+        run: scripts/prepare_release.sh

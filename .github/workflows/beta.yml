@@ -1,0 +1,98 @@
+name: Beta
+
+# Sends builds that internal testers already have to the public TestFlight
+# group. Nothing is rebuilt. See docs/releasing.md.
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Commit to promote (default, the newest one on master with builds)
+        required: false
+
+permissions:
+  # Points the draft release at the promoted commit.
+  contents: write
+  statuses: read
+
+concurrency:
+  group: beta
+  cancel-in-progress: false
+
+# bash -eo pipefail, so a failing command in a pipe fails its step
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  promote:
+    name: Promote to beta
+    if: github.ref == 'refs/heads/master'
+    environment: app-store
+    runs-on: macos-latest
+    timeout-minutes: 20
+    env:
+      ASC_APP_ID: ${{ vars.ASC_APP_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+      ASC_BYPASS_KEYCHAIN: '1'
+      ASC_NO_UPDATE: '1'
+      GROUP_ID: ${{ vars.TESTFLIGHT_BETA_GROUP_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: rudrankriyam/setup-asc@5358c70a27a3f0d1517604b0f1fdc43e70c1cc4d
+        with:
+          version: 6.3.0
+      - name: Find the builds
+        id: builds
+        env:
+          COMMIT: ${{ inputs.commit }}
+        run: scripts/testflight_builds.sh "${COMMIT:-HEAD}" | tee -a "$GITHUB_OUTPUT"
+      - name: Use the draft release as test notes
+        env:
+          VERSION: ${{ steps.builds.outputs.version }}
+        run: |
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq "[.[] | select(.draft and .tag_name == \"v$VERSION\")][0] // empty")
+          if [[ -z $release ]]; then
+            echo "::warning::No draft release v$VERSION, so the test notes stay as they are."
+            exit 0
+          fi
+          notes=$(jq -r '.body // ""' <<< "$release" | scripts/release_notes.py plain)
+          [[ -n $notes ]] || exit 0
+          delimiter="NOTES_$(uuidgen)"
+          {
+            echo "TEST_NOTES<<$delimiter"
+            echo "$notes"
+            echo "$delimiter"
+          } >> "$GITHUB_ENV"
+      - name: Add the builds to the beta group
+        env:
+          VERSION: ${{ steps.builds.outputs.version }}
+          IOS_BUILD: ${{ steps.builds.outputs.ios }}
+          COMMIT: ${{ steps.builds.outputs.commit }}
+        run: |
+          build_id=$(asc builds list --app "$ASC_APP_ID" --platform IOS \
+            --version "$VERSION" --build-number "$IOS_BUILD" --output json | jq -er '.data[0].id')
+          if [[ -n ${TEST_NOTES:-} ]]; then
+            asc builds test-notes update --build-id "$build_id" --locale en-US \
+              --whats-new "$TEST_NOTES" --output table
+          fi
+          asc builds add-groups --build-id "$build_id" --group "$GROUP_ID" \
+            --submit --confirm --output table
+          printf 'IOS %s (%s) from `%s` is on its way to beta testers.\n' \
+            "$VERSION" "$IOS_BUILD" "$COMMIT" >> "$GITHUB_STEP_SUMMARY"
+      - name: Point the draft release at the promoted commit
+        env:
+          VERSION: ${{ steps.builds.outputs.version }}
+          COMMIT: ${{ steps.builds.outputs.commit }}
+        run: |
+          release_id=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq "[.[] | select(.draft and .tag_name == \"v$VERSION\")][0].id // empty")
+          [[ -n $release_id ]] || exit 0
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$release_id" \
+            -f target_commitish="$COMMIT" > /dev/null
