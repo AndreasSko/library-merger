@@ -1,0 +1,161 @@
+name: Internal TestFlight
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+    paths-ignore: ['docs/**', '**/*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Serialize uploads: an upload accepted by Apple cannot be canceled.
+concurrency:
+  group: internal-testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Release build
+    if: github.ref != 'refs/heads/master'
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check release scripts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s scripts -p 'test_release*.py'
+      - name: Build Release without signing
+        run: |
+          xcodebuild -project LibraryMerger.xcodeproj -scheme LibraryMerger \
+            -configuration Release -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/build" CODE_SIGNING_ALLOWED=NO build
+
+  publish:
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    environment: testflight
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: write
+    env:
+      ASC_APP_ID: ${{ vars.ASC_APP_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+      ASC_BYPASS_KEYCHAIN: '1'
+      ASC_NO_UPDATE: '1'
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      GROUP_ID: ${{ vars.TESTFLIGHT_INTERNAL_GROUP_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: rudrankriyam/setup-asc@5358c70a27a3f0d1517604b0f1fdc43e70c1cc4d
+        with:
+          version: 6.3.0
+      - name: Pick version and test notes
+        run: |
+          version=$(scripts/app_version.sh)
+          [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          echo "APP_VERSION=$version" >> "$GITHUB_ENV"
+          notes=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+            --jq '.[0].body // ""' | scripts/release_notes.py paragraph \
+            | scripts/release_notes.py plain)
+          # A random delimiter keeps PR text from adding environment entries.
+          delimiter="NOTES_$(uuidgen)"
+          {
+            echo "TEST_NOTES<<$delimiter"
+            printf '%s\n\nCommit %s\n' "${notes:-Automatic build from master.}" "$GITHUB_SHA"
+            echo "$delimiter"
+          } >> "$GITHUB_ENV"
+      - name: Check internal audience
+        run: |
+          asc testflight groups list --app "$ASC_APP_ID" --internal \
+            --paginate --output json | jq -e --arg id "$GROUP_ID" \
+            'any(.data[]; .id == $id and .attributes.isInternalGroup == true)'
+      - name: Import signing identity
+        uses: apple-actions/import-codesign-certs@a533c09a88c7f2d5f26c2cb7925ba7a4b92173c8
+        with:
+          p12-file-base64: ${{ secrets.SIGNING_CERTIFICATES_P12_BASE64 }}
+          p12-password: ${{ secrets.SIGNING_CERTIFICATES_PASSWORD }}
+      - name: Install provisioning profile and export settings
+        env:
+          PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          umask 077
+          directory="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+          mkdir -p "$directory"
+          printf '%s' "$PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/profile"
+          security cms -D -i "$RUNNER_TEMP/profile" > "$RUNNER_TEMP/profile.plist"
+          uuid=$(plutil -extract UUID raw "$RUNNER_TEMP/profile.plist")
+          cp "$RUNNER_TEMP/profile" "$directory/$uuid.mobileprovision"
+          echo "PROFILE_UUID=$uuid" >> "$GITHUB_ENV"
+          python3 - <<'PY'
+          import os, plistlib
+          from pathlib import Path
+          settings = {
+              'method': 'app-store-connect', 'destination': 'export',
+              'manageAppVersionAndBuildNumber': False,
+              'signingStyle': 'manual', 'signingCertificate': 'Apple Distribution',
+              'teamID': os.environ['APPLE_TEAM_ID'],
+              'provisioningProfiles': {'de.andreas-sk.jwlm':
+                  plistlib.loads(Path(os.environ['RUNNER_TEMP'], 'profile.plist').read_bytes())['UUID']},
+              'testFlightInternalTestingOnly': False, 'uploadSymbols': True,
+          }
+          Path(os.environ['RUNNER_TEMP'], 'ExportOptions.plist').write_bytes(plistlib.dumps(settings))
+          PY
+      - name: Archive and export iOS
+        id: archive
+        run: |
+          number=$(asc builds next-build-number --app "$ASC_APP_ID" \
+            --platform IOS --output json | jq -er '.nextBuildNumber')
+          [[ $number =~ ^[1-9][0-9]*$ ]]
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          xcodebuild -project LibraryMerger.xcodeproj -scheme LibraryMerger \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/IOS.xcarchive" \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution' \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" PROVISIONING_PROFILE_SPECIFIER="$PROFILE_UUID" \
+            MARKETING_VERSION="$APP_VERSION" CURRENT_PROJECT_VERSION="$number" archive
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/IOS.xcarchive" \
+            -exportPath "$RUNNER_TEMP/IOS" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+      - name: Keep symbols for manual Sentry upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-dSYMs-${{ github.sha }}-${{ steps.archive.outputs.number }}
+          path: ${{ runner.temp }}/IOS.xcarchive/dSYMs
+          if-no-files-found: error
+      - name: Publish to internal testers and record the build
+        env:
+          BUILD_NUMBER: ${{ steps.archive.outputs.number }}
+        run: |
+          files=("$RUNNER_TEMP/IOS/"*.ipa)
+          [[ ${#files[@]} == 1 && -f "${files[0]}" ]]
+          asc publish testflight --app "$ASC_APP_ID" --ipa "${files[0]}" \
+            --platform IOS --version "$APP_VERSION" --build-number "$BUILD_NUMBER" \
+            --group "$GROUP_ID" --wait --timeout 30m \
+            --test-notes "$TEST_NOTES" --locale en-US --output json > "$RUNNER_TEMP/publish.json"
+          build_id=$(jq -er '.buildId' "$RUNNER_TEMP/publish.json")
+          asc testflight groups list --build-id "$build_id" --output json \
+            | jq -e --arg id "$GROUP_ID" \
+              '.complete == true and any(.groups[]; .id == $id and .type == "internal")'
+          jq -n --arg description "$APP_VERSION ($BUILD_NUMBER)" \
+            --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{state: "success", context: "testflight/IOS", description: $description, target_url: $url}' \
+            | gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" --input - > /dev/null
+          printf 'iOS %s (%s), commit `%s`, is processed and assigned to internal testers.\n' \
+            "$APP_VERSION" "$BUILD_NUMBER" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
