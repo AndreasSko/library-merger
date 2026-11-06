@@ -154,6 +154,9 @@ struct CatalogDBSettingsView: View {
                     catalogNeedsUpdate = GomobileCatalogNeedsUpdate(catalogDBPath?.path)
                 } else if !(manager.getProgress()?.canceled ?? false) {
                     downloadError = manager.error()
+                    captureError(NSError(domain: "CatalogDownload", code: 1,
+                                         userInfo: [NSLocalizedDescriptionKey: downloadError]),
+                                 operation: "catalog", stage: "download")
                 }
             }
         }

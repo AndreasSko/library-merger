@@ -106,13 +106,19 @@ struct BackupView: View {
         }
         .fileImporter(isPresented: $isSelectingFile,
                       allowedContentTypes: [.jwlibrary]) { (result) in
+            addBreadcrumb("file-picker.result", data: ["side": side.rawValue])
             switch result {
             case .success(let url):
                 startImport(url: url)
             case .failure(let error):
+                captureError(error, operation: "import", stage: "file-picker", side: side)
                 errorMessage = error.localizedDescription
                 showError = true
             }
+        }
+        .onChange(of: isSelectingFile) { presented in
+            addBreadcrumb(presented ? "file-picker.present" : "file-picker.dismiss",
+                          data: ["side": side.rawValue])
         }
     }
 
