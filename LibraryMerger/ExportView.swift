@@ -40,7 +40,9 @@ struct ExportView: View {
         .sheet(isPresented: $showError) {
             ErrorView(error: $errorMessage)
         }
-        .sheet(isPresented: $isSharing, content: {
+        .sheet(isPresented: $isSharing, onDismiss: {
+            addBreadcrumb("share-sheet.dismiss")
+        }, content: {
             ShareView(url: self.$exportedURL)
         })
     }
@@ -50,8 +52,21 @@ struct ShareView: UIViewControllerRepresentable {
     @Binding var url: URL!
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ShareView>) -> UIActivityViewController {
-        return UIActivityViewController(activityItems: [url!],
-                                        applicationActivities: nil)
+        addBreadcrumb("share-sheet.create")
+        let started = ProcessInfo.processInfo.systemUptime
+        let controller = UIActivityViewController(activityItems: [url!],
+                                                  applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, completed, _, error in
+            let details: [String: Any] = [
+                "completed": completed,
+                "seconds": ProcessInfo.processInfo.systemUptime - started
+            ]
+            addBreadcrumb("share-sheet.complete", data: details)
+            if let error {
+                captureError(error, operation: "export", stage: "share-sheet", details: details)
+            }
+        }
+        return controller
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController,

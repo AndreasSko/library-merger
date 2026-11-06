@@ -31,6 +31,37 @@ func setupSentry(enableSentry: Bool) {
     }
 }
 
+/// Reports an error together with the operation and stage it happened in.
+/// Cancellations are expected and not reported.
+func captureError(_ error: Error, operation: String, stage: String,
+                  side: MergeSide? = nil, details: [String: Any] = [:]) {
+    guard !Diagnostics.isCancellation(error) else { return }
+    SentrySDK.capture(error: Diagnostics.reportableError(error)) { scope in
+        scope.setTag(value: operation, key: "operation")
+        scope.setTag(value: stage, key: "stage")
+        if let side {
+            scope.setTag(value: side.rawValue, key: "merge_side")
+        }
+        // Group by where an error happens. Otherwise every Go error ends up
+        // in the same "go Code 1" issue.
+        scope.setFingerprint(["{{ default }}", operation, stage])
+        if !details.isEmpty {
+            scope.setContext(value: details, key: "details")
+        }
+    }
+}
+
+func addBreadcrumb(_ message: String, data: [String: Any] = [:]) {
+    let crumb = Breadcrumb()
+    crumb.level = SentryLevel.info
+    crumb.category = "merger-controller"
+    crumb.message = message
+    if !data.isEmpty {
+        crumb.data = data
+    }
+    SentrySDK.addBreadcrumb(crumb)
+}
+
 enum Diagnostics {
     static var executionEnvironment: String {
         #if targetEnvironment(macCatalyst)
@@ -51,5 +82,27 @@ enum Diagnostics {
         }
         #endif
         return preference
+    }
+
+    /// Sentry shows an NSError's debug description as the error message, and
+    /// otherwise only "Code: 1". Keep the original description there, so we see
+    /// the actual reason, for example from Go.
+    static func reportableError(_ error: Error) -> NSError {
+        let original = error as NSError
+        var userInfo = original.userInfo
+        userInfo[NSLocalizedDescriptionKey] = original.localizedDescription
+        if userInfo[NSDebugDescriptionErrorKey] == nil {
+            userInfo[NSDebugDescriptionErrorKey] = original.localizedDescription
+        }
+        return NSError(domain: original.domain, code: original.code, userInfo: userInfo)
+    }
+
+    static func isCancellation(_ error: Error) -> Bool {
+        if error is CancellationError {
+            return true
+        }
+        let nsError = error as NSError
+        return (nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError)
+            || (nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled)
     }
 }
