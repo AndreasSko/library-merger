@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0DE00140000000000000001 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00140000000000000002 /* Diagnostics.swift */; };
+		C0DE00140000000000000003 /* DiagnosticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00140000000000000004 /* DiagnosticsTests.swift */; };
 		C0DE00130000000000000001 /* BackupFileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00130000000000000002 /* BackupFileLoader.swift */; };
 		C0DE00130000000000000003 /* BackupFileLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00130000000000000004 /* BackupFileLoaderTests.swift */; };
 		C0DE00120000000000000001 /* PlaylistChangedField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00120000000000000002 /* PlaylistChangedField.swift */; };
@@ -64,6 +66,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0DE00140000000000000002 /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
+		C0DE00140000000000000004 /* DiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsTests.swift; sourceTree = "<group>"; };
 		C0DE00130000000000000002 /* BackupFileLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileLoader.swift; sourceTree = "<group>"; };
 		C0DE00130000000000000004 /* BackupFileLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileLoaderTests.swift; sourceTree = "<group>"; };
 		C0DE00120000000000000002 /* PlaylistChangedField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistChangedField.swift; sourceTree = "<group>"; };
@@ -185,6 +189,7 @@
 				F4B6A4502AA2441500DFC7E1 /* BackupIncompatibleView.swift */,
 				F43B4A1D253346DC005BF9E8 /* MergerController.swift */,
 				C0DE00130000000000000002 /* BackupFileLoader.swift */,
+				C0DE00140000000000000002 /* Diagnostics.swift */,
 				F4B8AEAE25867E7B008DF433 /* PublicationController.swift */,
 				F43574BA2533411B00EC55D4 /* Assets.xcassets */,
 				F43574BF2533411B00EC55D4 /* Info.plist */,
@@ -208,6 +213,7 @@
 			children = (
 				F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */,
 				C0DE00130000000000000004 /* BackupFileLoaderTests.swift */,
+				C0DE00140000000000000004 /* DiagnosticsTests.swift */,
 				AABBCCDD0000000000000002 /* Fixtures */,
 				F43574CA2533411B00EC55D4 /* Info.plist */,
 			);
@@ -446,6 +452,7 @@
 				F441B1502549AE4900B0409B /* MergeView.swift in Sources */,
 				F43B4A1E253346DD005BF9E8 /* MergerController.swift in Sources */,
 				C0DE00130000000000000001 /* BackupFileLoader.swift in Sources */,
+				C0DE00140000000000000001 /* Diagnostics.swift in Sources */,
 				F44BF82B2533602B0057B980 /* FileType.swift in Sources */,
 				F43574B72533411900EC55D4 /* LibraryMergerApp.swift in Sources */,
 				F42649AE257E469100644CA6 /* SettingsView.swift in Sources */,
@@ -469,6 +476,7 @@
 			files = (
 				F43574C92533411B00EC55D4 /* LibraryMergerTests.swift in Sources */,
 				C0DE00130000000000000003 /* BackupFileLoaderTests.swift in Sources */,
+				C0DE00140000000000000003 /* DiagnosticsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
