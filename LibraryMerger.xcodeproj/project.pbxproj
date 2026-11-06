@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0DE00130000000000000001 /* BackupFileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00130000000000000002 /* BackupFileLoader.swift */; };
+		C0DE00130000000000000003 /* BackupFileLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00130000000000000004 /* BackupFileLoaderTests.swift */; };
 		C0DE00120000000000000001 /* PlaylistChangedField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00120000000000000002 /* PlaylistChangedField.swift */; };
 		AABBCCDD0000000000000001 /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = AABBCCDD0000000000000002 /* Fixtures */; };
 		F402E1D827789A020083C4EB /* Gomobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F402E1D727789A020083C4EB /* Gomobile.xcframework */; };
@@ -62,6 +64,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0DE00130000000000000002 /* BackupFileLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileLoader.swift; sourceTree = "<group>"; };
+		C0DE00130000000000000004 /* BackupFileLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupFileLoaderTests.swift; sourceTree = "<group>"; };
 		C0DE00120000000000000002 /* PlaylistChangedField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistChangedField.swift; sourceTree = "<group>"; };
 		AABBCCDD0000000000000002 /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fixtures; sourceTree = "<group>"; };
 		F402E1D727789A020083C4EB /* Gomobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Gomobile.xcframework; sourceTree = "<group>"; };
@@ -180,6 +184,7 @@
 				F434746C2A6835AD00CC424E /* PlaylistWarningView.swift */,
 				F4B6A4502AA2441500DFC7E1 /* BackupIncompatibleView.swift */,
 				F43B4A1D253346DC005BF9E8 /* MergerController.swift */,
+				C0DE00130000000000000002 /* BackupFileLoader.swift */,
 				F4B8AEAE25867E7B008DF433 /* PublicationController.swift */,
 				F43574BA2533411B00EC55D4 /* Assets.xcassets */,
 				F43574BF2533411B00EC55D4 /* Info.plist */,
@@ -202,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				F43574C82533411B00EC55D4 /* LibraryMergerTests.swift */,
+				C0DE00130000000000000004 /* BackupFileLoaderTests.swift */,
 				AABBCCDD0000000000000002 /* Fixtures */,
 				F43574CA2533411B00EC55D4 /* Info.plist */,
 			);
@@ -439,6 +445,7 @@
 				F43574B92533411900EC55D4 /* ContentView.swift in Sources */,
 				F441B1502549AE4900B0409B /* MergeView.swift in Sources */,
 				F43B4A1E253346DD005BF9E8 /* MergerController.swift in Sources */,
+				C0DE00130000000000000001 /* BackupFileLoader.swift in Sources */,
 				F44BF82B2533602B0057B980 /* FileType.swift in Sources */,
 				F43574B72533411900EC55D4 /* LibraryMergerApp.swift in Sources */,
 				F42649AE257E469100644CA6 /* SettingsView.swift in Sources */,
@@ -461,6 +468,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F43574C92533411B00EC55D4 /* LibraryMergerTests.swift in Sources */,
+				C0DE00130000000000000003 /* BackupFileLoaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

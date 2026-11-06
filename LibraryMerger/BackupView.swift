@@ -21,6 +21,8 @@ struct BackupView: View {
 
     @State private var isSelectingFile: Bool = false
     @State private var isImporting: Bool = false
+    @State private var importPhase: ImportPhase?
+    @State private var importTask: Task<Void, Never>?
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
     @State private var showPlaylistWarning: Bool = false
@@ -36,7 +38,7 @@ struct BackupView: View {
                 .hidden()
 
             if isImporting {
-                ProgressView()
+                importingView
             } else if !fileSelected {
                 VStack {
                     Button(action: {
@@ -104,19 +106,42 @@ struct BackupView: View {
         }
         .fileImporter(isPresented: $isSelectingFile,
                       allowedContentTypes: [.jwlibrary]) { (result) in
-            Task {
-                isImporting.toggle()
-                do {
-                    let url = try result.get()
-                    await importBackup(url: url)
-                } catch {
-                    isImporting = false
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-                isImporting = false
+            switch result {
+            case .success(let url):
+                startImport(url: url)
+            case .failure(let error):
+                errorMessage = error.localizedDescription
+                showError = true
             }
         }
+    }
+
+    private var importingView: some View {
+        VStack(spacing: 12) {
+            ProgressView()
+            Group {
+                switch importPhase {
+                case .downloading:
+                    Text("Downloading backup…")
+                case .opening:
+                    Text("Opening backup…")
+                case .importing:
+                    Text("Importing backup…")
+                case nil:
+                    EmptyView()
+                }
+            }
+            .foregroundColor(.gray)
+            .multilineTextAlignment(.center)
+            // Go can't be interrupted, so only the wait for the file can be cancelled.
+            if importPhase != .importing {
+                Button("Cancel") {
+                    importTask?.cancel()
+                }
+            }
+        }
+        .font(.callout)
+        .padding(.horizontal)
     }
 
     private func loadedView(stats: GomobileDatabaseStats, playlistsSkipped: Bool) -> some View {
@@ -172,19 +197,34 @@ struct BackupView: View {
     }
 
     func wasPressed() async {
+        guard !isImporting else { return }
         doneMerging = false
-        if sharedUrl != nil {
-            await importBackup(url: sharedUrl!)
+        if let url = sharedUrl {
             sharedUrl = nil
+            startImport(url: url)
         } else {
             isSelectingFile.toggle()
         }
     }
 
+    func startImport(url: URL) {
+        isImporting = true
+        importTask = Task {
+            await importBackup(url: url)
+            isImporting = false
+            importPhase = nil
+            importTask = nil
+        }
+    }
+
     func importBackup(url: URL) async {
         do {
-            try await mergerController.importBackup(url: url, side: side)
+            try await mergerController.importBackup(url: url, side: side) { phase in
+                importPhase = phase
+            }
             fileSelected = true
+        } catch is CancellationError {
+            return
         } catch {
             errorMessage = error.localizedDescription
             showError = true

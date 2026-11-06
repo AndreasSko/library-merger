@@ -56,20 +56,6 @@ class MergeProgress: ObservableObject {
     }
 }
 
-enum GeneralError: Error {
-    case general(message: String)
-    case timeout(message: String)
-}
-
-extension GeneralError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .timeout(let message), .general(let message):
-            return message
-        }
-    }
-}
-
 enum MergeError: Error {
     case notInitialized(message: String)
     case mergeConflict
@@ -109,18 +95,23 @@ class MergerController: ObservableObject {
                                       noteResolver: .disabled,
                                       inputFieldResolver: .disabled,
                                       playlistResolver: .disabled)
+        cleanUpInbox()
     }
 
-    func importBackup(url: URL, side: MergeSide) async throws {
+    func importBackup(url: URL, side: MergeSide,
+                      phase: @escaping @MainActor (ImportPhase) -> Void = { _ in }) async throws {
         addBreadcrumb("importBackup from \(url.absoluteString) for side \(side.rawValue)")
         self.dbWrapper.skipUnsupportedPlaylists(true)
 
         let accessGranted = url.startAccessingSecurityScopedResource()
-        defer { url.stopAccessingSecurityScopedResource() }
-        defer { cleanUpInbox() }
+        defer { if accessGranted { url.stopAccessingSecurityScopedResource() } }
+        defer { removeFromInbox(url) }
 
+        let staged: BackupFileLoader.StagedBackup
         do {
-            try downloadFileIfNecessary(url: url)
+            staged = try await BackupFileLoader().load(url, phase: phase)
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             captureError(error, userInfo: [
                 "url": url.absoluteString,
@@ -132,54 +123,19 @@ class MergerController: ObservableObject {
 
             throw error
         }
+        defer { staged.remove() }
+        try Task.checkCancellation()
 
+        await phase(.importing)
         do {
-            try dbWrapper.importJWLBackup(url.path, side: side.rawValue)
+            try dbWrapper.importJWLBackup(staged.url.path, side: side.rawValue)
         } catch {
             captureError(error, userInfo: [
                 "url": url.absoluteString,
-                "accessGranted": accessGranted,
-                "fileExists": FileManager.default.fileExists(atPath: url.path),
-                "isReadable": FileManager.default.isReadableFile(atPath: url.path),
-                "bookmarkDataExists": (try? url.bookmarkData()) != nil
+                "accessGranted": accessGranted
             ])
 
             throw error
-        }
-    }
-
-    func downloadFileIfNecessary(url: URL) throws {
-        let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: url.path) {
-            return
-        }
-
-        // First, try for iCloud files (ubiquitous items)
-        if fileManager.isUbiquitousItem(at: url) {
-            try fileManager.startDownloadingUbiquitousItem(at: url)
-        } else {
-            // For third-party cloud providers, use NSFileCoordinator
-            var error: NSError?
-            let coordinator = NSFileCoordinator(filePresenter: nil)
-            coordinator.coordinate(readingItemAt: url, options: .withoutChanges, error: &error) { _ in
-            }
-
-            if let error = error {
-                throw error
-            }
-        }
-
-        var wait = 0
-        while true {
-            if wait > 60 {
-                throw GeneralError.timeout(message: "Failed to download \(url.lastPathComponent). "
-                    + "Timeout after \(wait) seconds. Please try again.")
-            }
-            if fileManager.fileExists(atPath: url.path) {
-                return
-            }
-            sleep(1)
-            wait += 1
         }
     }
 
@@ -222,15 +178,30 @@ class MergerController: ObservableObject {
         }
     }
 
-    // cleanUpInbox removes all files inside the inbox
+    // removeFromInbox removes a backup that was shared into the app once it's imported.
+    // Only this file is removed: another backup may have been shared in the meantime.
+    func removeFromInbox(_ url: URL) {
+        guard let inbox = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("Inbox"),
+              url.deletingLastPathComponent().resolvingSymlinksInPath().path
+                == inbox.resolvingSymlinksInPath().path else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    // cleanUpInbox removes backups that were shared into the app more than a day ago
+    // but never imported. Newer ones may be about to be imported.
     func cleanUpInbox() {
         let fm = FileManager.default
         do {
             let dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Inbox")
             let files = try fm.contentsOfDirectory(at: dir!.absoluteURL,
-                                                   includingPropertiesForKeys: [.isRegularFileKey])
+                                                   includingPropertiesForKeys: [.addedToDirectoryDateKey])
+            let dayAgo = Date().addingTimeInterval(-24 * 60 * 60)
             for file in files {
-                try fm.removeItem(at: file)
+                let added = try file.resourceValues(forKeys: [.addedToDirectoryDateKey]).addedToDirectoryDate
+                if let added, added < dayAgo {
+                    try fm.removeItem(at: file)
+                }
             }
         } catch {
             let nsError = error as NSError
