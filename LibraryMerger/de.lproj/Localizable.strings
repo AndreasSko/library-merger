@@ -13,6 +13,9 @@
 // BackupView
 "Select Backup" = "Backup auswählen";
 "Import" = "Importieren";
+"Downloading backup…" = "Backup wird heruntergeladen…";
+"Opening backup…" = "Backup wird geöffnet…";
+"Importing backup…" = "Backup wird importiert…";
 "Error while importing backup" = "Beim Importieren ist ein Fehler aufgetreten";
 "Bookmarks:" = "Lesezeichen:";
 "Input fields:" = "Eingabefelder:";
