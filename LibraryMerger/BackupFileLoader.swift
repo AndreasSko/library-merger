@@ -94,7 +94,7 @@ final class BackupFileLoader {
                                                options: [.withoutChanges, .resolvesSymbolicLink],
                                                error: &coordinationError) { url in
                             do {
-                                try fileManager.copyItem(at: url, to: destination)
+                                try Self.copyFile(at: url, to: destination)
                             } catch {
                                 copyError = error
                             }
@@ -112,5 +112,34 @@ final class BackupFileLoader {
         } onCancel: {
             coordinator.cancel()
         }
+    }
+
+    /// Some file providers can't copy a file and fail with "feature not
+    /// supported", but they can still be read. Copy those by reading.
+    static func copyFile(at source: URL, to destination: URL) throws {
+        do {
+            try FileManager.default.copyItem(at: source, to: destination)
+        } catch let error as NSError where error.domain == NSCocoaErrorDomain
+                                       && error.code == NSFeatureUnsupportedError {
+            try? FileManager.default.removeItem(at: destination)
+            try copyByReading(source, to: destination)
+        }
+    }
+
+    static func copyByReading(_ source: URL, to destination: URL) throws {
+        let input = try FileHandle(forReadingFrom: source)
+        defer { try? input.close() }
+        try Data().write(to: destination)
+        let output = try FileHandle(forWritingTo: destination)
+        do {
+            while let chunk = try input.read(upToCount: 1 << 20), !chunk.isEmpty {
+                try output.write(contentsOf: chunk)
+            }
+        } catch {
+            try? output.close()
+            throw error
+        }
+        // Closing can report a failed write.
+        try output.close()
     }
 }
