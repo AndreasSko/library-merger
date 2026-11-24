@@ -65,6 +65,8 @@ To figure out where the marking is located, look at the additional information: 
 I would really appreciate it if you could send me a bug report with the error below at library.merger@andreas-sk.de. Usually, it's beneficial for me to have a look at the actual backups you tried to merge. So if you feel confident with it, please feel free to provide them with the bug report - of course, I'm only looking at the specific issue and leave the rest of the data untouched.
 Thank you so much for your help! 😊";
 "errorView.sentryHint" = "You can also decide to automatically send error reports:";
+"errorView.noSpace" = "Your device is out of storage. Please free up some space and try again.";
+"errorView.notABackup" = "This file is not a JW Library backup, or it is damaged. Please create a new backup in JW Library and try again.";
 
 // PlaylistWarningView
 "playlistWarningView.explanation" = "The backup contains playlists that use features Library Merger can't merge yet, like markers.

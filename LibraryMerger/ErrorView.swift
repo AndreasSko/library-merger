@@ -25,8 +25,17 @@ struct ErrorView: View {
                 Spacer()
             }.padding(.bottom, 5)
 
-            Text("errorView.reportError")
-                .padding(.bottom)
+            switch Diagnostics.userProblem(error) {
+            case .noSpace:
+                Text("errorView.noSpace")
+                    .padding(.bottom)
+            case .notABackup:
+                Text("errorView.notABackup")
+                    .padding(.bottom)
+            case .incompatibleBackup, nil:
+                Text("errorView.reportError")
+                    .padding(.bottom)
+            }
 
             Text("The following error was returned:")
                 .bold()

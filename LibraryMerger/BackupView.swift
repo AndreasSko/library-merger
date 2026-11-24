@@ -95,7 +95,7 @@ struct BackupView: View {
             }
         }
         .sheet(isPresented: $showError) {
-            if errorMessage.lowercased().contains("backup incompatible") {
+            if Diagnostics.userProblem(errorMessage) == .incompatibleBackup {
                 BackupIncompatibleView(error: $errorMessage)
             } else {
                 ErrorView(error: $errorMessage)

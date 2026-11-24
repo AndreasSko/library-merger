@@ -173,6 +173,8 @@ Um herauszufinden, zu welcher Publikation eine Markierung gehört, kannst du dic
 Ich würde mich freuen, wenn du mir einen Fehlerbericht mit dem unten stehenden Fehler an library.merger@andreas-sk.de schicken könntest. Häufig ist es für mich ganz hilfreich, wenn ich auch einen kurzen Blick in die Backups haben kann. Falls du dich damit wohl fühlst, kannst du die Backups gerne in der Email mitschicken - natürlich schaue ich mir nur das Problem an und lasse den Rest der Daten in Ruhe.
 Vielen Dank für deine Hilfe! 😊";
 "errorView.sentryHint" = "Du kannst Bug Reports auch automatisch versenden:";
+"errorView.noSpace" = "Auf deinem Gerät ist kein Speicherplatz mehr frei. Bitte gib etwas Speicher frei und versuche es noch einmal.";
+"errorView.notABackup" = "Diese Datei ist kein JW Library Backup oder sie ist beschädigt. Bitte erstelle in JW Library ein neues Backup und versuche es noch einmal.";
 "The following error was returned:" = "Folgender Fehler wurde zurückgegeben:";
 "Copy" = "Kopieren";
 "Copied" = "Kopiert";
