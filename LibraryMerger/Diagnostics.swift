@@ -35,16 +35,18 @@ func setupSentry(enableSentry: Bool) {
 /// Cancellations are expected and not reported.
 func captureError(_ error: Error, operation: String, stage: String,
                   side: MergeSide? = nil, details: [String: Any] = [:]) {
-    guard !Diagnostics.isCancellation(error) else { return }
+    guard !Diagnostics.isCancellation(error), !Diagnostics.isExpected(error) else { return }
     SentrySDK.capture(error: Diagnostics.reportableError(error)) { scope in
         scope.setTag(value: operation, key: "operation")
         scope.setTag(value: stage, key: "stage")
         if let side {
             scope.setTag(value: side.rawValue, key: "merge_side")
         }
-        // Group by where an error happens. Otherwise every Go error ends up
-        // in the same "go Code 1" issue.
-        scope.setFingerprint(["{{ default }}", operation, stage])
+        // Sentry groups an NSError by its domain and code, so every Go error
+        // would end up in the same "go Code 1" issue. Group by where and why
+        // it happens instead.
+        scope.setFingerprint(["{{ default }}", operation, stage,
+                              Diagnostics.groupingMessage(error.localizedDescription)])
         if !details.isEmpty {
             scope.setContext(value: details, key: "details")
         }
@@ -95,6 +97,62 @@ enum Diagnostics {
             userInfo[NSDebugDescriptionErrorKey] = original.localizedDescription
         }
         return NSError(domain: original.domain, code: original.code, userInfo: userInfo)
+    }
+
+    /// Problems with the user's backup or device that the app explains
+    /// itself. They are not bugs, so they are not reported.
+    enum UserProblem {
+        case incompatibleBackup
+        case notABackup
+        case noSpace
+    }
+
+    /// Matches the exact Go messages: the start for errors Go returns as they
+    /// are, the end for system errors that Go wraps with a path. A file name
+    /// in another error must not match.
+    static func userProblem(_ message: String) -> UserProblem? {
+        if message.hasPrefix("backup incompatible: ") {
+            return .incompatibleBackup
+        }
+        if message == "zip: not a valid zip file" {
+            return .notABackup
+        }
+        if message.hasSuffix(": no space left on device") {
+            return .noSpace
+        }
+        return nil
+    }
+
+    static func isExpected(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileWriteOutOfSpaceError {
+            return true
+        }
+        return userProblem(error.localizedDescription) != nil
+    }
+
+    private static let groupingPatterns: [(NSRegularExpression, String)] = [
+        ("[a-z]+://\\S+", "<url>"),
+        // Go doesn't quote paths in errors and they can contain spaces, so a
+        // path ends at the next colon.
+        ("/[^:\"]+", "<path>"),
+        ("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "<uuid>"),
+        ("[0-9a-f]{16,}", "<hash>"),
+        ("[0-9]+(\\.[0-9]+){3}(:[0-9]+)?", "<ip>"),
+        // Short numbers like HTTP status codes tell errors apart.
+        ("[0-9]{4,}", "<n>")
+    ].compactMap { pattern, template in
+        (try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)).map { ($0, template) }
+    }
+
+    /// Removes the parts of an error message that differ between users, like
+    /// paths and IDs, so the same error is grouped into one issue.
+    static func groupingMessage(_ message: String) -> String {
+        groupingPatterns.reduce(message) { message, pattern in
+            pattern.0.stringByReplacingMatches(in: message,
+                                               range: NSRange(message.startIndex..., in: message),
+                                               withTemplate: pattern.1)
+        }
     }
 
     static func isCancellation(_ error: Error) -> Bool {

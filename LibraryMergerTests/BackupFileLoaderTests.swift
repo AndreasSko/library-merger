@@ -82,4 +82,15 @@ final class BackupFileLoaderTests: XCTestCase {
         controller.removeFromInbox(fresh)
         XCTAssertFalse(FileManager.default.fileExists(atPath: fresh.path))
     }
+
+    func testCopyByReadingCopiesLargeFiles() throws {
+        let source = root.appendingPathComponent("large.jwlibrary")
+        let destination = root.appendingPathComponent("copy.jwlibrary")
+        let data = Data((0..<(3 << 20)).map { UInt8(truncatingIfNeeded: $0) })
+        try data.write(to: source)
+
+        try BackupFileLoader.copyByReading(source, to: destination)
+
+        XCTAssertEqual(try Data(contentsOf: destination), data)
+    }
 }
